@@ -1,0 +1,109 @@
+.movies__item {
+    background: #2F2F2F;
+    cursor: pointer;
+    position: relative;
+  }
+  
+.movies__link {
+  text-decoration: none;
+  color: #fff;
+  display: flex;
+  flex-direction: column;
+ }
+  
+.movies__info {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  order: 1;
+  margin: 14px 16px 14px 12px;
+}
+  
+.movies__title {
+  font-size: 12px;
+  font-weight: 500;
+  line-height: 15px;
+  margin: 0;
+}
+  
+.movies__photo {
+  display: block;
+  width: 100%;
+  aspect-ratio: 1.786;
+}
+  
+.movies__duration {
+  line-height: 13px;
+  color: #8B8B8B;
+  margin: 0;
+}
+  
+.movies__button {
+  width: 14px;
+  height: 12px;
+  background-color: transparent;
+  border: none;
+  cursor: pointer;
+  position: absolute;
+  bottom: 36px;
+  right: 16px;
+  z-index: 5;
+  background-repeat: no-repeat;
+  background-position: center;
+}
+  
+.movies__button_like {
+  background-image: url(../../../images/iconLike.svg);
+}
+  
+.movies__button_delete {
+  background-image: url(../../../images/closeButton.svg);
+  background-size: cover;
+}
+
+.movies__button_like-active {
+  background-image: url(../../../images/iconaLikeActive.svg);
+}
+  
+@media (min-width: 520px) {
+  .movies__link {
+    flex-direction: row;
+    justify-content: space-between;
+  }
+  
+  .movies__photo {
+    order: 1;
+    width: 220px;
+    height: 122px;
+    padding: 6px;
+  }
+  
+  .movies__button {
+    left: 22px;
+    bottom: 22px;
+  }
+  
+  .movies__info {
+    margin: 22px;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 13px;
+  }
+}
+  
+@media (min-width: 768px) {
+  .movies__title {
+    font-size: 18px;
+    line-height: 22px;
+  }
+  
+  .movies__link:hover {
+    outline: 1px solid rgba(66, 133, 244, 0.5);
+    border-radius: 5px;
+  }
+  
+  .movies__button:hover {
+    opacity: 0.8;
+  }
+}

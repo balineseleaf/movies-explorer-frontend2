@@ -1,0 +1,141 @@
+.form__input {
+    box-sizing: border-box;
+    border: none;
+    width: 100%;
+    appearance: none;
+    font-size: 14px;
+    line-height: 22px;
+    transition: 0.5s opacity ease-out;
+  }
+  
+  .form:not([novalidate]) .form__input:invalid {
+    color: red;
+  }
+  
+  .form__input::placeholder {
+    font-size: 14px;
+    line-height: 20px;
+    padding: 0;
+    color: #8B8B8B;
+    background-color: transparent;
+  }
+  
+  .form__input:disabled,
+  .form__input::placeholder:disabled {
+    color: red;
+    outline-color: red;
+  }
+  
+  .form__input:disabled:hover {
+    cursor: default;
+    opacity: 1;
+  }
+  
+  .form__input_type_error {
+    color: #EE3465;
+    outline: 1px solid #EE3465;
+  }
+  
+  .form__error {
+    font-size: 10px;
+    line-height: 13px;
+    transition: 0.5s;
+    min-height: 14px;
+    padding: 0;
+    margin: auto 0 20px;
+    text-align: center;
+  }
+  
+  /* Auth */
+  .form__label_type_register,
+  .form__label_type_login {
+    color:#8B8B8B;
+    line-height: 12px;
+  }
+  
+  .form__input_type_register,
+  .form__input_type_login {
+    color: #fff;
+    padding: 15px;
+    border-radius: 8px;
+    background: #2F2F2F;
+    margin-top: 10px;
+    font-size: 13px;
+    line-height: 16px;
+  }
+  
+  .form__input_type_register::placeholder,
+  .form__input_type_login::placeholder {
+    color: #fff;
+    font-size: 13px;
+    line-height: 16px;
+  }
+  
+  .form__error_register,
+  .form__error_login {
+    color: #EE3465;
+    min-height: 20px;
+    display: block;
+    margin: 0;
+    font-size: 10px;
+    line-height: 10px;
+    text-align: start;
+  }
+  
+  /* Profile */
+  .form__label_type_profile {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 2px;
+    height: 13px;
+  }
+  
+  .form__error_profile {
+    grid-column: span 2;
+  }
+  
+  .form__input_type_profile {
+    padding: 0;
+    line-height: 13px;
+    font-size: 11px;
+    background-color: #202020;
+    color: #fff;
+    text-align: right;
+  }
+  
+  .form__item_type_profile:first-child::after {
+    position: absolute;
+    content: "";
+    width: 100%;
+    height: 1px;
+    background-color: #424242;
+    bottom: -18px;
+    left: 0;
+  }
+  
+  .form__input_type_profile::placeholder {
+    color: #fff;
+    font-size: 11px;
+    line-height: 13px;
+    opacity: 1;
+    text-align: right;
+  }
+  
+  @media (min-width: 768px) {
+  
+    .form__input_type_login::placeholder,
+    .form__input_type_register::placeholder {
+      font-size: 13px;
+    }
+  }
+  
+  @media (min-width: 880px) {
+    .form__input:hover {
+      cursor: text;
+      opacity: 0.8;
+    }
+  
+    .form__input_type_short:hover {
+      cursor: pointer;
+    }
+  }

@@ -58,7 +58,7 @@ const Header = () => {
     >
       <div className={classNameHeaderContainer()}>
         <Link className='header__link header__link_logo' to={mainPath}>
-          <img className='header__logo' src={logoMain} alt='Logo' />
+          <img className='header__logo' src={logoMain} alt='Логотип' />
         </Link>
         {!pathAuth &&
           (!isLoggedIn ? (
@@ -99,7 +99,7 @@ const Header = () => {
                   >
                     Аккаунт
                     <div className='header__profileIcon'>
-                      <img src={profileIcon} alt='profile icon' />
+                      <img src={profileIcon} alt='Иконка профиля' />
                     </div>
                   </NavLink>
                 </Navigation>

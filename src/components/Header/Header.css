@@ -73,6 +73,7 @@
     text-align: center;
     font-weight: 500;
     text-decoration: none;
+    transition: opacity 0.5s ease-out;
   }
   
   .header__button-menu {
@@ -185,6 +186,10 @@
     }
   
     .header__link:hover {
+      opacity: 0.8;
+    }
+
+    .header__button:hover {
       opacity: 0.8;
     }
   

@@ -12,6 +12,7 @@ import Movies from '../Movies/Movies';
 import Profile from '../Profile/Profile';
 import Auth from '../Main/Auth/Auth';
 import Error from '../Main/Error/Error';
+import { useNavigate } from 'react-router-dom';
 
 const App = () => {
   const {
@@ -31,7 +32,7 @@ const App = () => {
     isError: false,
     text: '',
   });
-
+  const navigate = useNavigate();
   const [isProfileEdit, setIsProfileEdit] = useState(false);
   const [savedMovies, setSavedMovies] = useState([]);
 
@@ -39,6 +40,10 @@ const App = () => {
     setIsProfileEdit(true);
   }
   const { pathname } = useLocation();
+
+  const handleSignout = () => {
+    navigate(mainPath, { replace: true });
+  };
 
   return (
     <MessageContext.Provider value={message}>
@@ -62,6 +67,7 @@ const App = () => {
               <Profile
                 isEdit={isProfileEdit}
                 onEditProfile={handleEditProfile}
+                onSignout={handleSignout}
               />
             }
           />

@@ -12,6 +12,7 @@
   width: 100%;
   gap:37px 24px;
   margin: 0 0 10px;
+  justify-content: center;
 }
   
 .movies__button-more {
@@ -49,6 +50,13 @@
     margin-top: 40px;
   }
 }
+
+@media screen and (max-width: 768px) {
+  .movies__button-more {
+    margin: 70px auto 80px;
+  }
+}
+
 
 @media screen and (max-width: 550px) {
   .movies {

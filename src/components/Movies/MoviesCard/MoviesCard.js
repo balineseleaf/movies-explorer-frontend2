@@ -1,5 +1,5 @@
 import './MoviesCard.css';
-import movieExample from '../../../images/movieExample.svg';
+import movieExample from '../../../images/myMovieCard.jpg';
 import { Link, useLocation } from 'react-router-dom';
 import { PATHS } from '../../../utils/constants';
 
@@ -18,11 +18,11 @@ const MoviesCard = () => {
         <p className='movies-card__subtitle'>33 слова о дизайне</p>
 
         {pathname === moviesPath && (
-          <button className={`movies-card__like`}></button>
+          <button type='button' className={`movies-card__like`}></button>
         )}
 
         {pathname === savedMoviesPath && (
-          <button className={`movies-card__delete`}></button>
+          <button type='button' className={`movies-card__delete`}></button>
         )}
       </div>
 

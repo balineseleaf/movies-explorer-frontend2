@@ -14,9 +14,12 @@ const MoviesCardList = ({ onSubmitMoreButton }) => {
         <MoviesCard />
         <MoviesCard />
         <MoviesCard />
-        <MoviesCard />
       </ul>
-      <button className='movies__button-more' onClick={onSubmitMoreButton}>
+      <button
+        type='button'
+        className='movies__button-more'
+        onClick={onSubmitMoreButton}
+      >
         Ещё
       </button>
     </section>

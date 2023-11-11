@@ -121,12 +121,20 @@
       min-height: 379px;
     }
   
-    .form__button-save_type_register,
     .form__button-save_type_login {
       font-size: 14px;
       line-height: 17px;
       padding-top: 13px;
       padding-bottom: 15px;
+      margin-top: 109px;
+    }
+
+    .form__button-save_type_register {
+      font-size: 14px;
+      line-height: 17px;
+      padding-top: 13px;
+      padding-bottom: 15px;
+      margin-top: 56px;
     }
   
     /* Profile */
@@ -147,12 +155,20 @@
   
   @media (min-width: 1280px) {
   
-    .form__button-save_type_register,
     .form__button-save_type_login {
       font-size: 14px;
       line-height: 17px;
       padding-top: 13px;
       padding-bottom: 15px;
+      margin-top: 123px;
+    }
+
+    .form__button-save_type_register {
+      font-size: 14px;
+      line-height: 17px;
+      padding-top: 13px;
+      padding-bottom: 15px;
+      margin-top: 34px;
     }
   
     /* Profile */

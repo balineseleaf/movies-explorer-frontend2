@@ -38,7 +38,14 @@
   background-color: #222;
   background-image: url('../../../images/iconLike.svg');
   cursor: pointer;
+  transition: opacity 0.5s ease-out;
 }
+
+.movies-card__like :hover{
+  opacity: 0.8;
+}
+
+
 
 .movies-card__delete{
   display: flex;
@@ -83,10 +90,6 @@
 
   .movies-card__delete{
     opacity: 1;
-  }
-
-  .movies-card__caption{
-    padding: 0 0 24px;
   }
 }
 

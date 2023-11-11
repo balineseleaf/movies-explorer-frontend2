@@ -1,5 +1,23 @@
+.form__wrapper {
+  position: relative;
+}
+
+.form__switcher {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin: 41px auto 80px;
+}
+
+.form__switcher-text {
+  line-height: 18px;
+  font-size: 14px;
+  margin-left: 12px;
+  color: #fff;
+}
+
 .form_type_search {
-    padding: 80px 0 0;
+    padding: 60px 0 0;
     position: relative;
     min-height: 272px;
     display: flex;
@@ -19,49 +37,54 @@
   
   .form__button-save_type_search {
     position: absolute;
-    right: 20px;
-    top: 99px;
-    line-height: 18px;
-    min-width: 59px;
+    transform: translateY(-50%);
+    top: 50%;
+    right: 6px;
+    background-image: url(../../../images/blueFindIcon2.svg);
+    background-color: transparent;
+    background-repeat: no-repeat;
+    width: 34px;
+    height: 34px;
   }
-  
+
+  /*главный сеарч*/
   .form__input_type_search {
-    padding: 25px 99px 25px 19px;
+    border-style: none;
+    padding: 17px 99px 16px 19px;
     background: #222222;
-    border-radius: 9px;
+    border-radius: 40px;
     box-shadow: 0px 3px 14px 0px rgba(0, 0, 0, 0.08);
     color: #8B8B8B;
+    width: 100%;
   }
-  
+
+  /*короткометражки*/
   .form__input_type_short {
     position: relative;
-    width: 36px;
-    height: 20px;
+    width: 43px;
+    height: 24px;
     appearance: none;
     background-color: #343434;
-    border-radius: 10px;
+    border-radius: 40px;
     transition: background-color 0.6s;
     cursor: pointer;
   }
   
   .form__label_type_short {
-    display: grid;
-    grid-template-columns: 36px 99px;
+    display: flex;
+    flex-direction: row;
     line-height: 18px;
-    align-items: center;
-    justify-content: center;
-    gap: 0 13px;
     margin: 45px 0 0;
   }
   
   .form__input_type_short::before {
     position: absolute;
     content: "";
-    width: 8px;
-    height: 8px;
+    width: 16px;
+    height: 16px;
     background-color: #A0A0A0;
-    left: 6px;
-    top: 6px;
+    left: 7px;
+    top: 4px;
     border-radius: 50%;
     transition: transform 0.6s;
   }
@@ -89,34 +112,27 @@
     padding-bottom: 10px;
     color: #fff;
   }
+  @media (min-width: 320px) {
+
+    .form_type_search {
+      min-height: 242px;
+    }
+  }
   
   @media (min-width: 768px) {
+
+    .form_type_search {
+      min-height: 272px;
+    }
+
     .form__input_type_search {
-      padding: 25px 307px 25px 63px;
-      background-image: url(../../../images/iconForFind.svg);
+      padding: 14px 307px 14px 22px;
       background-repeat: no-repeat;
       background-position: 19px center;
       background-size: 23px 23px;
     }
   
-    .form__button-save_type_search {
-      right: 227px;
-    }
-  
-    .form__button-save_type_search::after {
-      position: absolute;
-      content: "";
-      height: 40px;
-      width: 1px;
-      top: 50%;
-      transform: translateY(-50%);
-      right: -20px;
-      background-color: #505050;
-      opacity: 1;
-    }
-  
     .form__label_type_short {
-      position: absolute;
       right: 38px;
       top: 106px;
       font-size: 13px;
@@ -133,22 +149,8 @@
   
   @media (min-width: 1280px) {
     .form_type_search {
-      padding-top: 70px;
+      padding-top: 60px;
       min-height: 222px;
-    }
-  
-    .form__input_type_search {
-      padding-right: 326px;
-    }
-  
-    .form__button-save_type_search {
-      top: 89px;
-      right: 246px;
-    }
-  
-    .form__label_type_short {
-      right: 47px;
-      top: 96px;
     }
   
     .form__message_search {

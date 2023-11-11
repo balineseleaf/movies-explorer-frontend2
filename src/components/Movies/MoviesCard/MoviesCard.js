@@ -1,19 +1,32 @@
 import './MoviesCard.css';
 import movieExample from '../../../images/movieExample.svg';
-
-import { Link } from 'react-router-dom';
+import { Link, useLocation } from 'react-router-dom';
+import { PATHS } from '../../../utils/constants';
 
 const MoviesCard = () => {
+  const { moviesPath, savedMoviesPath } = PATHS;
+
+  const { pathname } = useLocation();
+
   return (
-    <li className='movies__item'>
-      <Link className='movies__link' to='' target='_blank'>
-        <div className='movies__info'>
-          <h2 className='movies__title'>33 слова о дизайне</h2>
-          <p className='movies__duration'>1ч 42м</p>
-        </div>
-        <img className='movies__photo' src={movieExample} alt='Фильм' />
+    <li className='movies-card'>
+      <Link to='' target='_blank'>
+        <img className='movies-card__image' src={movieExample} alt='Фильм' />
       </Link>
-      <button className={'movies__button movies__button_like'} type='button' />
+
+      <div className='movies-card__caption'>
+        <p className='movies-card__subtitle'>33 слова о дизайне</p>
+
+        {pathname === moviesPath && (
+          <button className={`movies-card__like`}></button>
+        )}
+
+        {pathname === savedMoviesPath && (
+          <button className={`movies-card__delete`}></button>
+        )}
+      </div>
+
+      <p className='movies-card__duration'>1ч 47м</p>
     </li>
   );
 };

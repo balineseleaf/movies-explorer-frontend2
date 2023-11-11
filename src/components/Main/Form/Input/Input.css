@@ -4,7 +4,7 @@
     width: 100%;
     appearance: none;
     font-size: 14px;
-    line-height: 22px;
+    line-height: 18px; /*22px исправить*/
     transition: 0.5s opacity ease-out;
   }
   

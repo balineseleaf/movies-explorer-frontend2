@@ -102,8 +102,6 @@ const profileForm = {
 const searchForm = {
   name: 'search',
   title: 'Найти',
-  buttonText: 'Найти',
-  buttonTextLoading: 'Поиск...',
   inputs: [
     {
       type: 'search',

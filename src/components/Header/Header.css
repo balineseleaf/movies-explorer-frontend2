@@ -55,9 +55,10 @@
     justify-content: center;
     text-decoration: none;
     color: #fff;
-    transition: opacity 0.5s ease-out;
+    transition: 0.3s ease-in-out;
     font-weight: 500;
     line-height: 22px;
+    opacity: 1;
   }
   
   .header__link.active {
@@ -73,7 +74,15 @@
     text-align: center;
     font-weight: 500;
     text-decoration: none;
-    transition: opacity 0.5s ease-out;
+    transition: 0.3s ease-in-out;
+    opacity: 1;
+  }
+  .header__link:hover {
+    opacity: 0.7;
+  }
+
+  .header__button:hover {
+    opacity: 0.7;
   }
   
   .header__button-menu {
@@ -184,14 +193,7 @@
     .header__link {
       font-size: 12px;
     }
-  
-    .header__link:hover {
-      opacity: 0.8;
-    }
 
-    .header__button:hover {
-      opacity: 0.8;
-    }
   
     .header__button-menu {
       width: 44px;

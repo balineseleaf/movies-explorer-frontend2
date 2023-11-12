@@ -50,6 +50,24 @@
     font-size: 14px;
     font-weight: 500;
     margin-bottom: 70px;
+    transition: .3 ease-in-out;
+    opacity: 1;
+  }
+
+  .about-me__link:hover {
+    transform: scale(1.004);
+    opacity: 0.8;
+  } 
+  
+
+
+  @media (min-width: 320px) {
+    .about-me__wrapper {
+      margin-top: 60px;
+    }
+    .about-me__title {
+      margin-top: 40px;
+    }
   }
   
   @media (min-width: 768px) {

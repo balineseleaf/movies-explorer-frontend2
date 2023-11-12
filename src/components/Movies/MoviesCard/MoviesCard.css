@@ -4,14 +4,21 @@
   font-size: 13px;
   font-weight: 500;
   background-color: #222;
+  transition: .3s ease-in-out;
+  opacity: 1;
 }
 
-.movies-card__image{
+.movies-card:hover {
+  transform: scale(1.05);
+  opacity: 0.7;
+}
+
+.movies-card__image {
   width: 100%;
   aspect-ratio: 1.78/1;
 }
 
-.movies-card__caption{
+.movies-card__caption {
   width: 100%;
   display: flex;
   flex-direction: row;
@@ -20,7 +27,7 @@
   margin: 11px 0 0;
 }
 
-.movies-card__subtitle{
+.movies-card__subtitle {
   margin: 0;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -28,7 +35,7 @@
   padding-left: 16px;
 }
 
-.movies-card__like{
+.movies-card__like {
   display: flex;
   flex-direction: row;
   margin-right: 16px;
@@ -38,16 +45,16 @@
   background-color: #222;
   background-image: url('../../../images/iconLike.svg');
   cursor: pointer;
-  transition: opacity 0.5s ease-out;
+  transition: 0.3s ease-out;
+  opacity: 1;
 }
 
-.movies-card__like :hover{
+.movies-card__like:hover {
+  transform: scale(1.6);
   opacity: 0.8;
 }
 
-
-
-.movies-card__delete{
+.movies-card__delete {
   display: flex;
   flex-direction: row;
   padding: 0;
@@ -71,7 +78,7 @@
   animation: like-on .5s linear;
 }
 
-.movies-card__duration{
+.movies-card__duration {
   color: #8B8B8B;
   font-size: 11px;
   font-style: normal;
@@ -83,13 +90,16 @@
 }
 
 @media screen and (max-width:980px) {
-  .movies-card__image{
+  .movies-card__image {
     width: 339px;
     aspect-ratio: 1.78/1;
   }
 
-  .movies-card__delete{
+  .movies-card__delete {
     opacity: 1;
+  }
+    .movies-card__caption {
+    margin: 5px 0 0;
   }
 }
 
@@ -101,17 +111,25 @@
     aspect-ratio: 1.78/1;
   }
 
-
-  .movies-card__caption{
-    padding: 0 0 25px;
+  .movies-card {
+    width:300px;
   }
 
-  .movies-card__subtitle{
+  .movies-card__like {
+    margin-right: 10px;
+  }
+
+
+  /* .movies-card__caption{
+    margin: 5px 0 0;
+  } */
+
+  .movies-card__subtitle {
     font-size: 12px;
     line-height: normal;
   }
 
-  .movies-card__duration{
+  .movies-card__duration {
     margin: 5px 0 0;
     font-size: 10px;
   }

@@ -13,8 +13,15 @@
   }
   
   .navigation__link {
+    transition: .3 ease-in-out;
+    opacity: 1;
     color: #fff;
   }
+
+  .navigation__link:hover {
+    opacity: 0.8;
+  }
+
   
   @media (min-width: 768px) {
     .navigation__items {

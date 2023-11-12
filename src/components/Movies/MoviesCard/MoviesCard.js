@@ -11,7 +11,11 @@ const MoviesCard = () => {
   return (
     <li className='movies-card'>
       <Link to='' target='_blank'>
-        <img className='movies-card__image' src={movieExample} alt='Фильм' />
+        <img
+          className='movies-card__image'
+          src={movieExample}
+          alt={movieExample.name}
+        />
       </Link>
 
       <div className='movies-card__caption'>

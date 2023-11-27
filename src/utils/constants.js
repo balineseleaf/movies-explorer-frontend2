@@ -44,8 +44,6 @@ export const METHODS_FETCH = {
   deleteFetch: 'DELETE',
 };
 
-export const CREDENTIALS = 'include';
-
 export const LANDING_LINKS = {
   abouteProject: '#about',
   techs: '#techs',

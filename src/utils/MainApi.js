@@ -1,4 +1,4 @@
-import { METHODS_FETCH, PATHS, CREDENTIALS } from './constants';
+import { METHODS_FETCH, PATHS } from './constants';
 import { apiConfig } from './utils';
 
 const { loginPath, logoutPath, registerPath, userPath, moviesPath } = PATHS;
@@ -31,7 +31,7 @@ class Api {
     return this._request(`${this._baseUrl}${registerPath}`, {
       method: postFetch,
       headers: this._headers,
-      credentials: CREDENTIALS,
+      credentials: 'include',
       body: JSON.stringify({
         name: name,
         email: email,
@@ -45,7 +45,7 @@ class Api {
     return this._request(`${this._baseUrl}${loginPath}`, {
       method: postFetch,
       headers: this._headers,
-      credentials: CREDENTIALS,
+      credentials: 'include',
       body: JSON.stringify({
         email: email,
         password: password,
@@ -57,7 +57,7 @@ class Api {
   checkToken() {
     return this._request(`${this._baseUrl}${userPath}`, {
       headers: this._headers,
-      credentials: CREDENTIALS,
+      credentials: 'include',
     });
   }
 
@@ -65,7 +65,7 @@ class Api {
   logout() {
     return this._request(`${this._baseUrl}${logoutPath}`, {
       headers: this._headers,
-      credentials: CREDENTIALS,
+      credentials: 'include',
     });
   }
 
@@ -73,7 +73,7 @@ class Api {
   getMovies() {
     return this._request(`${this._baseUrl}${moviesPath}`, {
       headers: this._headers,
-      credentials: CREDENTIALS,
+      credentials: 'include',
     });
   }
 
@@ -82,7 +82,7 @@ class Api {
     return this._request(`${this._baseUrl}${userPath}`, {
       method: patchFetch,
       headers: this._headers,
-      credentials: CREDENTIALS,
+      credentials: 'include',
       body: JSON.stringify({
         name: name,
         email: email,
@@ -95,7 +95,7 @@ class Api {
     return this._request(`${this._baseUrl}${moviesPath}`, {
       method: postFetch,
       headers: this._headers,
-      credentials: CREDENTIALS,
+      credentials: 'include',
       body: JSON.stringify(movie),
     });
   }
@@ -105,7 +105,7 @@ class Api {
     return this._request(`${this._baseUrl}${moviesPath}/${movieId}`, {
       method: deleteFetch,
       headers: this._headers,
-      credentials: CREDENTIALS,
+      credentials: 'include',
     });
   }
 }

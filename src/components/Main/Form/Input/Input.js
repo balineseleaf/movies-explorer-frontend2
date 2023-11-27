@@ -1,15 +1,16 @@
 import { useLocation } from 'react-router-dom';
-import { INPUT_NAMES, PATHS } from '../../../../utils/constants';
+import { TYPE_OF_INPUTS, PATHS } from '../../../../utils/constants';
 import './Input.css';
 
 const Input = ({
   value,
-  onChange,
+  handleChange,
   input,
   form,
   isChecked,
   onFocus,
   disabled,
+  errors,
 }) => {
   const {
     label,
@@ -23,7 +24,7 @@ const Input = ({
     autoComplete,
   } = input;
 
-  const { email, checkbox, search } = INPUT_NAMES;
+  const { email, checkbox, search } = TYPE_OF_INPUTS;
   const { pathname } = useLocation();
   const classInputForm = form ? `form__input_type_${form}` : '';
   const classLabelForm = form ? `form__label_type_${form}` : '';
@@ -39,7 +40,7 @@ const Input = ({
           name={name}
           checked={isChecked}
           required={required}
-          onChange={onChange}
+          onChange={handleChange}
           disabled={disabled}
           autoFocus={autoFocus ?? false}
           onFocus={onFocus}
@@ -55,7 +56,7 @@ const Input = ({
           placeholder={placeholder}
           required={required}
           value={value ?? ''}
-          onChange={onChange}
+          onChange={handleChange}
           autoComplete={autoComplete}
           disabled={disabled}
           autoFocus={autoFocus ?? false}
@@ -71,7 +72,7 @@ const Input = ({
           placeholder={placeholder}
           required={required}
           value={value ?? ''}
-          onChange={onChange}
+          onChange={handleChange}
           autoComplete={autoComplete}
           autoFocus={autoFocus ?? false}
           onFocus={onFocus}
@@ -89,7 +90,7 @@ const Input = ({
           maxLength={maxLength ?? ''}
           required={required}
           value={value ?? ''}
-          onChange={onChange}
+          onChange={handleChange}
           autoComplete={autoComplete}
           autoFocus={autoFocus ?? false}
           onFocus={onFocus}
@@ -107,7 +108,7 @@ const Input = ({
         pathname === PATHS.moviesPath || pathname === PATHS.savedMoviesPath
       ) && (
         <span className={`form__error form__error_${form} ${name}-error`}>
-          {/* {errors[name]} */}
+          {errors[name]}
         </span>
       )}
     </label>

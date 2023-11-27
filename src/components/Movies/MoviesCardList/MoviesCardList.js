@@ -1,30 +1,40 @@
 import './MoviesCardList.css';
 import MoviesCard from '../MoviesCard/MoviesCard';
 
-const MoviesCardList = ({ onSubmitMoreButton }) => {
+const MoviesCardList = ({
+  isSavedMoviesPage,
+  moviesList,
+  onMovieLike,
+  currentUser,
+  savedMovies,
+  onMoviedDelete,
+  onSubmitMoreButton,
+  showMoreButton,
+}) => {
   return (
     <section className='movies'>
       <ul className='movies__card-list'>
-        <MoviesCard />
-        <MoviesCard />
-        <MoviesCard />
-        <MoviesCard />
-        <MoviesCard />
-        <MoviesCard />
-        <MoviesCard />
-        <MoviesCard />
-        <MoviesCard />
-        <MoviesCard />
-        <MoviesCard />
-        <MoviesCard />
+        {moviesList.map((movie) => (
+          <MoviesCard
+            movie={movie}
+            key={movie.id ?? movie._id}
+            onMovieLike={onMovieLike}
+            onMoviedDelete={onMoviedDelete}
+            isSavedMoviesPage={isSavedMoviesPage}
+            currentUser={currentUser}
+            savedMovies={savedMovies}
+          />
+        ))}
       </ul>
-      <button
-        type='button'
-        className='movies__button-more'
-        onClick={onSubmitMoreButton}
-      >
-        Ещё
-      </button>
+      {showMoreButton && (
+        <button
+          type='button'
+          className='movies__button-more'
+          onClick={onSubmitMoreButton}
+        >
+          Ещё
+        </button>
+      )}
     </section>
   );
 };

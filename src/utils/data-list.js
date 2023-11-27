@@ -1,7 +1,7 @@
 const registerForm = {
   name: 'register',
   title: 'Добро пожаловать!',
-  buttonText: 'Зарегистрироваться',
+  buttonTextDefault: 'Зарегистрироваться',
   buttonTextLoading: 'Регистрация...',
   inputs: [
     {
@@ -41,7 +41,7 @@ const registerForm = {
 const loginForm = {
   name: 'login',
   title: 'Рады видеть!',
-  buttonText: 'Войти',
+  buttonTextDefault: 'Войти',
   buttonTextLoading: 'Вход...',
   inputs: [
     {
@@ -71,7 +71,7 @@ const loginForm = {
 const profileForm = {
   name: 'profile',
   title: 'Привет, Михаил!',
-  buttonText: 'Сохранить',
+  buttonTextDefault: 'Сохранить',
   buttonTextLoading: 'Сохранение...',
   textError: 'При обновлении профиля произошла ошибка.',
   inputs: [
@@ -102,6 +102,8 @@ const profileForm = {
 const searchForm = {
   name: 'search',
   title: 'Найти',
+  buttonTextDefault: 'Найти',
+  buttonTextLoading: 'Поиск...',
   inputs: [
     {
       type: 'search',
@@ -121,4 +123,21 @@ const searchForm = {
   ],
 };
 
-export { registerForm, loginForm, profileForm, searchForm };
+const deviceSettings = {
+  mobile: {
+    maxSize: 768,
+    maxMovies: 5,
+    moreMovies: 2,
+  },
+  tablet: {
+    maxSize: 1024,
+    maxMovies: 4,
+    moreMovies: 3,
+  },
+  desktop: {
+    maxMovies: 4,
+    moreMovies: 4,
+  },
+};
+
+export { registerForm, loginForm, profileForm, searchForm, deviceSettings };

@@ -22,9 +22,7 @@ const Header = () => {
 
   const { pathname } = useLocation();
   const pathAuth = pathname === registerPath || pathname === loginPath;
-  // const { isLoggedIn } = useContext(CurrentUserContext);
-  const isLoggedIn = false;
-  // const isLoggedIn = true;
+  const { isLoggedIn } = useContext(CurrentUserContext);
 
   const classNameHeaderContainer = () => {
     let className = 'header__container';
@@ -37,6 +35,9 @@ const Header = () => {
     if (pathAuth) {
       className = `${className} header__container_auth`;
     }
+    // if (pathname === mainPath) {
+    //   className = `${className} header__container_cover`;
+    // }
     return className;
   };
 

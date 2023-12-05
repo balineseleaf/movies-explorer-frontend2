@@ -1,0 +1,45 @@
+@import url(./vendor/normalize.css);
+@import url(./vendor/inter.css);
+
+.page {
+  width: 100%;
+  min-height: 100vh;
+  background-color: #202020;
+  color: #fff;
+  display: flex;
+  flex-direction: column;
+  margin: 0 auto;
+  font-family: 'Inter', Arial, sans-serif;
+  font-weight: 400;
+  font-size: 11px;
+  line-height: 16px;
+  box-sizing: border-box;
+}
+
+.page:has(.header_active) {
+  overflow-y: hidden;
+}
+
+.page__wrapper {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+}
+
+.page__container {
+  margin: 0 auto;
+}
+
+.button {
+  cursor: pointer;
+  transition: 0.5s opacity ease-out;
+  background-color: transparent;
+  box-shadow: none;
+  border: none;
+  padding: 0;
+}
+
+html {
+  scroll-behavior: smooth;
+  scrollbar-gutter: stable;
+}

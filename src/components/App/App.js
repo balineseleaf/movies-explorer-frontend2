@@ -11,8 +11,8 @@ import {
   PATHS,
   TIME_OUT_PRELOADER,
   DEVICE_SETTING,
-  KEYWORD_ISLOGGEDIN,
   TIME_REGISTER,
+  KEYWORD_MOVIES,
 } from '../../utils/constants';
 import SavedMovies from '../Movies/SavedMovies/SavedMovies';
 import Movies from '../Movies/Movies';
@@ -39,7 +39,9 @@ const App = () => {
 
   const { pathname } = useLocation();
   const [isErrorPage, setErrorPage] = useState(false);
-  const [currentUser, setCurrentUser] = useState({ isLoggedIn: true });
+  const [currentUser, setCurrentUser] = useState({
+    isLoggedIn: localStorage.getItem('isLoggedIn'),
+  });
   const [message, setMessage] = useState({
     isMessageShow: false,
     isError: false,
@@ -55,10 +57,95 @@ const App = () => {
   const [device, setDevice] = useState(DEVICE_SETTING.desktop.device);
   const [isFormActivated, setFormActivated] = useState(true);
 
-  // Получение сохраненных фильмов
+  const checktoken = () => {
+    const jwt = localStorage.getItem('jwt');
+    if (jwt) {
+      api
+        .checkToken(jwt)
+        .then((user) => {
+          setCurrentUser({
+            name: user.name,
+            email: user.email,
+            isLoggedIn: true,
+          });
+        })
+        .catch((err) => {
+          setCurrentUser({ isLoggedIn: false });
+          console.log(err);
+        });
+    }
+  };
+  // useEffect(() => {
+  //   const jwt = localStorage.getItem('jwt');
+  //   if (jwt) {
+  //     api
+  //       .checkToken(jwt)
+  //       .then((user) => {
+  //         setCurrentUser({
+  //           name: user.name,
+  //           email: user.email,
+  //           isLoggedIn: true,
+  //         });
+  //       })
+  //       .catch((err) => {
+  //         setCurrentUser({ isLoggedIn: false });
+  //         console.log(err);
+  //       });
+  //   }
+  // }, []);
+
+  // useEffect(() => {
+  //   const jwt = localStorage.getItem('jwt');
+  //   if (jwt) {
+  //     if (currentUser.isLoggedIn) {
+  //       Promise.all([
+  //         api.checkToken(jwt),
+  //         apiMovies.getMovies(),
+  //         api.getUserMovies(),
+  //       ])
+  //         .then(([user, movies, savedMovies]) => {
+  //           setAllMovies(movies);
+  //           setSavedMovies(savedMovies);
+  //           setCurrentUser({
+  //             name: user.name,
+  //             email: user.email,
+  //             isLoggedIn: true,
+  //           });
+  //         })
+  //         .catch((err) => {
+  //           setMessage({
+  //             isMessageShow: true,
+  //             isError: true,
+  //             text: MESSAGE.serverError,
+  //           });
+  //           setCurrentUser({ isLoggedIn: false });
+  //           setRequestError(err);
+  //           console.log(err);
+  //         });
+  //     }
+  //   }
+  // }, [currentUser.isLoggedIn]);
+
+  // Получение фильмов
+
+  const getMovies = async () => {
+    try {
+      const movies = await apiMovies.getMovies();
+      setAllMovies(movies);
+      return movies;
+    } catch (err) {
+      setMessage({
+        isMessageShow: true,
+        isError: true,
+        text: MESSAGE.serverError,
+      });
+    }
+  };
+
+  // Получение сохраненных фильмов пользователя
   const getSavedMovies = () => {
     api
-      .getMovies()
+      .getUserMovies()
       .then((movies) => {
         setSavedMovies(movies);
       })
@@ -68,60 +155,28 @@ const App = () => {
       });
   };
 
-  // Получение фильмов
-  const getMovies = () => {
-    apiMovies
-      .getMovies()
-      .then((movies) => {
-        setAllMovies(movies);
-      })
-      .catch((err) => {
-        setMessage({
-          isMessageShow: true,
-          isError: true,
-          text: MESSAGE.serverError,
-        });
-        console.log(err);
-      });
-  };
-  //Получение токена для авторизации
-  const checkToken = () => {
-    api
-      .checkToken()
-      .then((user) => {
-        setCurrentUser({
-          name: user.name,
-          email: user.email,
-          isLoggedIn: true,
-        });
-      })
-      .catch((err) => {
-        setCurrentUser({ isLoggedIn: false });
-        console.log(err);
-      });
-  };
-  // что делаем при логине
   useEffect(() => {
     if (currentUser.isLoggedIn) {
-      checkToken();
+      checktoken();
       getSavedMovies();
+    }
+    if (KEYWORD_MOVIES in localStorage) {
+      setAllMovies(JSON.parse(localStorage.getItem(KEYWORD_MOVIES)));
     }
     setTimeout(() => {
       setLoadingContent(false);
     }, TIME_OUT_PRELOADER);
   }, [currentUser.isLoggedIn]);
 
-  // Рисуем фильмы при авторизации
-  useEffect(() => {
-    if (currentUser.isLoggedIn) {
-      getMovies();
-      setTimeout(() => {
-        setLoadingContent(false);
-      }, TIME_OUT_PRELOADER);
-    }
-  }, [currentUser.isLoggedIn]);
-
-  // TODO: подумать можно ли объединять два эффекта
+  // // Рисуем фильмы при авторизации
+  // useEffect(() => {
+  //   if (currentUser.isLoggedIn) {
+  //     getMovies();
+  //     setTimeout(() => {
+  //       setLoadingContent(false);
+  //     }, TIME_OUT_PRELOADER);
+  //   }
+  // }, [currentUser.isLoggedIn]);
 
   // Изменение кол-ва карточек с кнопкой "Еще"
   useEffect(() => {
@@ -147,39 +202,13 @@ const App = () => {
     };
   }, [device]); // в зависимости от аппарата
 
-  // Функция логина
-  const handleLogin = (value) => {
-    setMessage({ isMessageShow: false, isError: false, text: '' });
-    setSendRequest(true);
-    api
-      .authorize(value)
-      .then(() => {
-        navigate(moviesPath, { replace: true }); // сразу на страницу с фильмами перенаправляем
-        setCurrentUser({ ...currentUser, isLoggedIn: true });
-        localStorage.setItem(KEYWORD_ISLOGGEDIN, true); // в локалсторадж записываем
-      })
-      .catch((err) => {
-        setFormActivated(true);
-        setTimeout(() => {
-          setMessage({
-            isMessageShow: true,
-            isError: true,
-            text: selectErrorMessage(err),
-          });
-        }, TIME_OUT_PRELOADER);
-      })
-      .finally(
-        setTimeout(() => {
-          setSendRequest(false);
-        }, TIME_OUT_PRELOADER)
-      );
-  };
   // функция регистрации
   const handleRegister = (value) => {
+    console.log('register', value);
     setMessage({ isMessageShow: false, isError: false, text: '' });
     setSendRequest(true);
     api
-      .addNewUser(value)
+      .register(value)
       .then(() => {
         setMessage({
           isMessageShow: true,
@@ -211,10 +240,42 @@ const App = () => {
         }, TIME_OUT_PRELOADER)
       );
   };
+
+  // Функция логина
+  const handleLogin = (value) => {
+    setMessage({ isMessageShow: false, isError: false, text: '' });
+    setSendRequest(true);
+    return api
+      .login(value)
+      .then((res) => {
+        if (res.JWT) {
+          navigate(moviesPath, { replace: true }); // сразу на страницу с фильмами перенаправляем
+          setCurrentUser({ ...currentUser, isLoggedIn: true });
+          console.log('in login function', currentUser);
+          localStorage.setItem('jwt', res.JWT);
+          localStorage.setItem('isLoggedIn', true);
+        }
+      })
+      .catch((err) => {
+        setFormActivated(true);
+        setTimeout(() => {
+          setMessage({
+            isMessageShow: true,
+            isError: true,
+            text: selectErrorMessage(err),
+          });
+        }, TIME_OUT_PRELOADER);
+      })
+      .finally(
+        setTimeout(() => {
+          setSendRequest(false);
+        }, TIME_OUT_PRELOADER)
+      );
+  };
   // лайки фильмов
   const handleMovieLike = (movie) => {
     const isLiked = savedMovies.some((item) => item.movieId === movie.movieId);
-
+    console.log('внутри функции handleMovieLike', isLiked);
     if (!isLiked) {
       api
         .addSavedMovies(movie)
@@ -244,7 +305,7 @@ const App = () => {
       .catch((err) => console.log(err));
   };
   // Управление профилем
-  const handleChengeProfile = (value) => {
+  const handleChangeProfile = (value) => {
     setMessage({ isMessageShow: false, isError: false, text: '' });
     setSendRequest(true);
     api
@@ -277,30 +338,20 @@ const App = () => {
       );
   };
   // Выход из аккаунта пользователя
-  const handleSignout = () => {
-    api
-      .logout()
-      .then(() => {
-        navigate(mainPath, { replace: true });
-        localStorage.clear();
-        setCurrentUser({ name: '', email: '', isLoggedIn: false });
-        setSavedMovies([]);
-        setRequestError({});
-        setMessage({
-          isMessageShow: false,
-          isError: false,
-          text: '',
-        });
-        setFormActivated(true);
-        setAllMovies([]);
-      })
-      .catch((err) => console.log(err))
-      .finally(
-        setTimeout(() => {
-          setLoadingContent(false);
-        }, TIME_OUT_PRELOADER)
-      );
-  };
+  function handleSignout() {
+    localStorage.clear();
+    navigate(mainPath, { replace: true });
+    setCurrentUser({ name: '', email: '', isLoggedIn: false });
+    setSavedMovies([]);
+    setRequestError({});
+    setMessage({
+      isMessageShow: false,
+      isError: false,
+      text: '',
+    });
+    setFormActivated(true);
+    setAllMovies([]);
+  }
 
   useEffect(() => {
     setMessage((message) => ({ ...message, text: '' }));
@@ -328,6 +379,7 @@ const App = () => {
                 savedMovies={savedMovies}
                 device={device}
                 isFormActivated={isFormActivated}
+                getMovies={getMovies}
               />
             }
             savedMovies={savedMovies}
@@ -348,7 +400,7 @@ const App = () => {
             element={
               <ProtectedRouteElement
                 element={Profile}
-                onSubmit={handleChengeProfile}
+                onSubmit={handleChangeProfile}
                 isLoggedIn={currentUser.isLoggedIn}
                 onSignout={handleSignout}
                 isLoadingContent={isLoadingContent}

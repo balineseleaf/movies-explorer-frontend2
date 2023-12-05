@@ -1,7 +1,6 @@
 import './Main.css';
 
-const Main = (props) => {
-  const { children, className } = props;
+const Main = ({ children, className }) => {
   return <main className={`main ${className}`}>{children}</main>;
 };
 

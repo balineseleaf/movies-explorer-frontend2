@@ -1,30 +1,93 @@
-import { useContext } from 'react';
+import { useContext, useEffect } from 'react';
 import { profileForm } from '../../utils/data-list';
 import './Profile.css';
 import Form from '../Main/Form/Form';
 import Input from '../Main/Form/Input/Input';
-import { useState } from 'react';
 import { CurrentUserContext } from '../../contexts/CurrentUserContext';
+import { useValidate } from '../../hooks/useValidate';
 
-const Profile = (props) => {
-  const { isEdit, onEditProfile, onSignout } = props;
+const Profile = ({  
+  onSubmit,
+  onSignout,
+  requestError,
+  isFormActivated,
+  setFormActivated,
+  isSendRequest,
+  setMessage,
+  }) => {
   const currentUser = useContext(CurrentUserContext);
-  const { name, buttonText, inputs } = profileForm;
-  const [profileValue, setProfileValue] = useState('');
+  const { name, buttonTextDefault, inputs } = profileForm;
+  const {
+    values,
+    errors,
+    isValid,
+    setValues,
+    isFormValid,
+    handleChange,
+    setValid,
+  } = useValidate(inputs);
+
+  const handleChangeProfile = (evt) => {
+    handleChange(evt);
+  };
+
+  const handleActivated = () => {
+    setFormActivated(true);
+    setMessage({
+      isMessageShow: false,
+      isError: false,
+      text: '',
+    });
+  };
+
+  const handleSubmit = (evt) => {
+    evt.preventDefault();
+    setFormActivated(false);
+    onSubmit(values);
+  };
 
   const handleClickExit = () => {
     onSignout();
   };
 
-  const handleProfileInputChange = (evt) => {
-    setProfileValue(evt.target.value);
-  };
+  useEffect(() => {
+    setValues((values) => ({
+      ...values,
+      name: currentUser.name,
+      email: currentUser.email,
+    }));
+    if (currentUser) {
+      setValid((isValid) => ({ ...isValid, name: true, email: true }));
+    }
+  }, [currentUser]);
+
+  useEffect(() => {
+    setFormActivated(false);
+    setMessage({
+      isMessageShow: false,
+      isError: false,
+      text: '',
+    });
+  }, [setFormActivated, setMessage]);
 
   return (
     <main className='main'>
       <section className='profile'>
-        <h1 className='profile__title'>Привет, Виталий!</h1>
-        <Form name={name} buttonText={buttonText} isProfileEdit={isEdit}>
+        <h1 className='profile__title'>{`Привет, ${currentUser.name}!`}</h1>
+        <Form 
+          name={name} 
+          buttonText={buttonTextDefault} 
+          onSubmit={handleSubmit}          
+          isFormActivated={isFormActivated}
+          disabledDafault={
+              currentUser.name === values.name &&
+              currentUser.email === values.email
+            }
+          requestError={requestError}
+          isSendRequest={isSendRequest}
+          isValid={isValid}
+          isFormValid={isFormValid}
+        >
           <ul className={`form__list form__list_type_${name}`}>
             {inputs.map((input) => (
               <li
@@ -32,27 +95,31 @@ const Profile = (props) => {
                 key={input.name + name}
               >
                 <Input
-                  value={profileValue}
+                  value={values[`${input.name}`]}
                   input={input}
+                  handleChange={handleChangeProfile}
                   form={name}
-                  onChange={handleProfileInputChange}
+                  isValid={isValid}
+                  disabled={!isFormActivated}
+                  onFocus={(e) => e.currentTarget.select()}
+                  errors={errors}
                 />
               </li>
             ))}
           </ul>
         </Form>
-        {!isEdit && (
+        {!isFormActivated && !isSendRequest && (
           <ul className='profile__list'>
             <li className='profile__item'>
               <button
                 type='button'
                 className='profile__button profile__button_edit'
-                onClick={onEditProfile}
+                onClick={handleActivated}
               >
                 Редактировать
               </button>
             </li>
-            <li className='profale__item'>
+            <li className='profile__item'>
               <button
                 type='button'
                 className='profile__button profile__button_exit'

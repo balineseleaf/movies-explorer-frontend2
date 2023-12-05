@@ -1,5 +1,4 @@
 import './MoviesCard.css';
-//import movieExample from '../../../images/myMovieCard.jpg';
 import { Link, useLocation } from 'react-router-dom';
 import { PATHS } from '../../../utils/constants';
 import { BASE_URL_API_MOVIES } from '../../../utils/constants';
@@ -14,11 +13,16 @@ const MoviesCard = ({
   const isLiked =
     !isSavedMoviesPage && savedMovies.some((item) => item.movieId === movie.id);
   const movieLikeButtonClassName = `movies-card__like ${
-    isLiked && 'movies-card__like-active'
+    isLiked && 'movies-card__like_active'
   }`;
   const { moviesPath, savedMoviesPath } = PATHS;
 
   const { pathname } = useLocation();
+
+  // console.log('isliked', isLiked);
+  // console.log('isSavedMvies', isSavedMoviesPage);
+  // console.log('savedMovies', savedMovies);
+
   function handleLikeClick() {
     onMovieLike({
       country: movie.country,
@@ -41,7 +45,11 @@ const MoviesCard = ({
 
   return (
     <li className='movies-card'>
-      <Link to={`${movie.trailerLink}`} target='_blank'>
+      <Link
+        class='movies__inner-container'
+        to={`${movie.trailerLink}`}
+        target='_blank'
+      >
         <img
           className='movies__card-image'
           src={
@@ -52,25 +60,28 @@ const MoviesCard = ({
           alt={movie.nameRU}
         />
       </Link>
-      {/* // с лайком решить */}
+
       <div className='movies-card__caption'>
-        <p className='movies-card__subtitle'>33 слова о дизайне</p>
+        <p className='movies-card__subtitle'>{movie.nameRU || movie.nameEN}</p>
 
-        {pathname === moviesPath && (
-          <button type='button' className={movieLikeButtonClassName}></button>
-        )}
+        {/* {pathname === moviesPath && <button type='button' className={movieLikeButtonClassName} onClick={handleLikeClick}></button>}
 
-        {pathname === savedMoviesPath && (
-          <button
+        {pathname === savedMoviesPath && <button
             type='button'
-            className={`movies-card__delete`}
-            onClick={!isSavedMoviesPage ? handleLikeClick : handleDeleteClick}
+            className={`${isSavedMoviesPage ? 'movies-card__delete' : movieLikeButtonClassName}`}
+            onClick={handleDeleteClick}
           ></button>
-        )}
+        } */}
+        <button
+          className={`movies-card__like ${
+            isSavedMoviesPage ? 'movies-card__delete' : movieLikeButtonClassName
+          }`}
+          type='button'
+          onClick={!isSavedMoviesPage ? handleLikeClick : handleDeleteClick}
+        />
       </div>
 
       <p className='movies-card__duration'>
-        {' '}
         {(movie.duration / 60) | 0}ч {movie.duration % 60}м
       </p>
     </li>

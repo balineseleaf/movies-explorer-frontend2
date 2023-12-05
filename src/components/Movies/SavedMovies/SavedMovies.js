@@ -13,6 +13,7 @@ const SavedMovies = ({ savedMovies, onMoviedDelete }) => {
     isSavedMoviesPage: true,
   });
 
+  
   useEffect(() => {
     if (!!filteredMovies) {
       if (filteredMovies.length === 0) {
@@ -27,8 +28,8 @@ const SavedMovies = ({ savedMovies, onMoviedDelete }) => {
     <Main className='main__movies'>
       <FormSearch
         isSavedMoviesPage={true}
-        valueSerch={valueSearch}
-        setValueSerch={setValueSearch}
+        valueSearch={valueSearch}
+        setValueSearch={setValueSearch}
         onSubmitSearch={handleSubmitSearch}
         searchStatus={searchStatus}
         isMessageShow={isMessageShow}

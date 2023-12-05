@@ -108,7 +108,7 @@ const Input = ({
         pathname === PATHS.moviesPath || pathname === PATHS.savedMoviesPath
       ) && (
         <span className={`form__error form__error_${form} ${name}-error`}>
-          {errors[name]}
+          {errors.name}
         </span>
       )}
     </label>

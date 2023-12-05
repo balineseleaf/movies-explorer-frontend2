@@ -6,27 +6,20 @@ class ApiMovies {
     this._headers = headers;
   }
 
-  // Метод проверки успешности запроса
-  _isOk(res) {
-    if (res.ok) {
-      return res.json();
-    }
-    return Promise.reject(
-      `Что-то где-то пошло не так... Код ошибки ${res.status}`
-    );
-  }
-
-  // Метод запроса с проверкой ответа
-  _request(url, options) {
-    return fetch(url, options).then(this._isOk);
-  }
-
-  // Метод запроса данных пользователя с сервера
+  // Метод запроса фильмов с сервера
   getMovies() {
-    return this._request(this._baseUrl, {
+    return fetch(this._baseUrl, {
+      method: 'GET',
       headers: this._headers,
-    });
+    }).then(handleResponse);
   }
 }
+  const handleResponse = (res) => {
+    if (res.ok) {
+      return res.json();
+    } else {
+      return Promise.reject(`Ошибка ${res.status}`);
+    }
+  };
 
 export const apiMovies = new ApiMovies(apiConfig);

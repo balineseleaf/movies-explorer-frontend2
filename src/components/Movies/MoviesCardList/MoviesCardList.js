@@ -11,6 +11,7 @@ const MoviesCardList = ({
   onSubmitMoreButton,
   showMoreButton,
 }) => {
+ // пустой массив по дефолту
   return (
     <section className='movies'>
       <ul className='movies__card-list'>

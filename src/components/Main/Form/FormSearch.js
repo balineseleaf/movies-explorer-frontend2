@@ -7,38 +7,39 @@ function FormSearch({
   isLoading,
   onSubmitSearch,
   isSavedMoviesPage,
-  valueSerch,
-  setValueSerch,
+  valueSearch,
+  setValueSearch,
   searchStatus,
   setMaxShowMovies,
   device,
   isErrorShow,
   isFormActivated,
 }) {
+  // console.log(valueSearch); // '' and false
   const { name, buttonTextLoading, buttonTextDefault, validate, inputs } =
     searchForm;
 
   const handleChange = (evt) => {
-    setValueSerch((valueSerch) => {
-      return { ...valueSerch, [evt.target.name]: evt.target.value };
+    setValueSearch((valueSearch) => {
+      return { ...valueSearch, [evt.target.name]: evt.target.value };
     });
   };
 
   const handleChangeCheckbox = (evt) => {
-    setValueSerch((valueSerch) => {
-      return { ...valueSerch, [evt.target.name]: evt.target.checked };
+    setValueSearch((valueSearch) => {
+      return { ...valueSearch, [evt.target.name]: evt.target.checked };
     });
 
     if (!isSavedMoviesPage && searchStatus.isFirstSearch) {
       return;
     }
-    onSubmitSearch({ ...valueSerch, [evt.target.name]: evt.target.checked });
+    onSubmitSearch({ ...valueSearch, [evt.target.name]: evt.target.checked });
     !isSavedMoviesPage && setMaxShowMovies(deviceSettings[device].maxMovies);
   };
 
   const handleSubmit = (evt) => {
     evt.preventDefault();
-    onSubmitSearch(valueSerch);
+    onSubmitSearch(valueSearch);
     !isSavedMoviesPage && setMaxShowMovies(deviceSettings[device].maxMovies);
   };
 
@@ -51,7 +52,7 @@ function FormSearch({
       isFormActivated={isFormActivated}
       searchStatus={searchStatus}
       isErrorShow={isErrorShow}
-      isFormValid={valueSerch.search.length !== 0}
+      isFormValid={valueSearch.search.length !== 0}
     >
       <div className='form__wrapper'>
         <input
@@ -59,7 +60,7 @@ function FormSearch({
           placeholder='Фильм'
           type='search'
           name='search'
-          value={valueSerch[name]}
+          value={valueSearch.name}
           handleChange={handleChange}
           required={true}
           autoFocus={true}
@@ -77,7 +78,7 @@ function FormSearch({
           name='short'
           required={false}
           handleChange={handleChangeCheckbox}
-          value={valueSerch[name]}
+          value={valueSearch.name}
         />
         <span className='form__switcher-text'>Короткометражки</span>
       </div>

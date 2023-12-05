@@ -1,8 +1,4 @@
-import { METHODS_FETCH, PATHS } from './constants';
 import { apiConfig } from './utils';
-
-const { loginPath, logoutPath, registerPath, userPath, moviesPath } = PATHS;
-const { postFetch, patchFetch, deleteFetch } = METHODS_FETCH;
 
 class Api {
   constructor({ baseUrl, headers }) {
@@ -10,104 +6,96 @@ class Api {
     this._headers = headers;
   }
 
-  // Приватный метод проверки успешности запроса
-  _isOk(res) {
-    if (res.ok) {
-      return res.json();
-    }
-    console.log(res);
-    return res.json().then((res) => {
-      throw res;
-    });
-  }
-
-  // Приватный метод запроса сразу с проверкой ответа
-  _request(url, options) {
-    return fetch(url, options).then(this._isOk);
-  }
-
   // Метод создания нового пользователя
-  addNewUser({ name, password, email }) {
-    return this._request(`${this._baseUrl}${registerPath}`, {
-      method: postFetch,
-      headers: this._headers,
+  register = ({name, email, password}) => {
+    return fetch(`${this._baseUrl}/signup`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
       credentials: 'include',
-      body: JSON.stringify({
-        name: name,
-        email: email,
-        password: password,
-      }),
-    });
-  }
+      body: JSON.stringify({ name, email, password }),
+    }).then(handleResponse);
+  };
 
   // Метод авторизации
-  authorize({ password, email }) {
-    return this._request(`${this._baseUrl}${loginPath}`, {
-      method: postFetch,
+  login({ email, password }) {
+    return fetch(`${this._baseUrl}/signin`, {
+      method: 'POST',
       headers: this._headers,
       credentials: 'include',
       body: JSON.stringify({
-        email: email,
-        password: password,
+        email,
+        password,
       }),
-    });
+    }).then(handleResponse);
   }
 
   // Метод запроса данных пользователя с сервера
-  checkToken() {
-    return this._request(`${this._baseUrl}${userPath}`, {
-      headers: this._headers,
+  checkToken (token) {
+    return fetch(`${this._baseUrl}/users/me`, {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+        authorization: `Bearer ${token}`,
+      },
       credentials: 'include',
-    });
-  }
-
-  // Метод выхода пользователя
-  logout() {
-    return this._request(`${this._baseUrl}${logoutPath}`, {
-      headers: this._headers,
-      credentials: 'include',
-    });
+    }).then(handleResponse);
   }
 
   // метод запроса сохраненных фильмов с сервера
-  getMovies() {
-    return this._request(`${this._baseUrl}${moviesPath}`, {
-      headers: this._headers,
+  getUserMovies() {
+    return fetch(`${this._baseUrl}/movies`, {
+      method: 'GET',
       credentials: 'include',
-    });
+    }).then(handleResponse);
+  }
+
+  getUser() {
+      return fetch(`${this._baseUrl}/users/me`, {
+        method:'GET',
+        credentials: 'include',
+      }).then(handleResponse);
   }
 
   // Метот передачи данных пользователя на сервер
   setUserInfoApi({ name, email }) {
-    return this._request(`${this._baseUrl}${userPath}`, {
-      method: patchFetch,
+    return fetch(`${this._baseUrl}/users/me`, {
+      method: 'PATCH',
       headers: this._headers,
       credentials: 'include',
       body: JSON.stringify({
         name: name,
         email: email,
       }),
-    });
+    }).then(handleResponse);
   }
-
-  // Метод отправки данных об установке/снятии лайка на сервер
+ // добавление в сохр. фильмы
   addSavedMovies(movie) {
-    return this._request(`${this._baseUrl}${moviesPath}`, {
-      method: postFetch,
+    return fetch(`${this._baseUrl}/movies`, {
+      method: 'POST',
       headers: this._headers,
       credentials: 'include',
       body: JSON.stringify(movie),
-    });
+    }).then(handleResponse);
   }
 
   // Метод удаления карточки с сервера
   deleteMovies(movieId) {
-    return this._request(`${this._baseUrl}${moviesPath}/${movieId}`, {
-      method: deleteFetch,
+    return fetch(`${this._baseUrl}$/movies/${movieId}`, {
+      method: 'DELETE',
       headers: this._headers,
       credentials: 'include',
-    });
+    }).then(handleResponse);
   }
 }
+
+const handleResponse = (res) => {
+  if (res.ok) {
+    return res.json();
+  } else {
+    return Promise.reject(`Ошибка ${res.status}`);
+  }
+};
 
 export const api = new Api(apiConfig);

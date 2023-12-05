@@ -1,15 +1,18 @@
 import { useEffect, useState } from 'react';
 import {
-  KEYWORD_SEARCH,
   MESSAGE,
   TIME_DOWNLOAD,
   TIME_OUT_PRELOADER,
   TIME_SHORT_MOVIES,
+  KEYWORD_MOVIES,
+  KEYWORD_SEARCHED_MOVIES,
+  KEYWORD_VALUES,
 } from '../utils/constants';
-import { useLocation } from 'react-router-dom';
+// import { useLocation } from 'react-router-dom';
 
-const useSearch = ({ movies, isSavedMoviesPage }) => {
+const useSearch = ({ movies, isSavedMoviesPage, getMovies }) => {
   const [filteredMovies, setFilteredMovies] = useState([]);
+
   const { beforeSearching, noMovies } = MESSAGE;
 
   const [savedSearch, setSavedSearch] = useState({
@@ -21,14 +24,14 @@ const useSearch = ({ movies, isSavedMoviesPage }) => {
   const [searchStatus, setSearchStatus] = useState({
     statusMessage: '',
     isLoading: false,
-    isFirstSearch: true,
+    isFirstSearch: false,
   });
 
-  const { pathname } = useLocation();
+  // const { pathname } = useLocation();
 
   // фильтрация в поиске
-  const filterSearh = (value) => {
-    return movies.filter(
+  const filterSearh = (value, moviesList) => {
+    return moviesList.filter(
       (movie) =>
         movie.nameRU
           .trim()
@@ -44,20 +47,20 @@ const useSearch = ({ movies, isSavedMoviesPage }) => {
   const filterShort = (moviesList) => {
     return moviesList.filter((movie) => movie.duration <= TIME_SHORT_MOVIES); // все фильмы меньше 40 мин
   };
-
+  
   // фильтрация фильмов с использованием функций
-  const filterMovies = (value) => {
+  const filterMovies = (value, moviesList) => {
     if (value.short) {
       //if true
-      return filterShort(filterSearh(value)); // передаем значение отфильтрованного из поисковой строки
+      return filterShort(filterSearh(value,moviesList)); // передаем значение отфильтрованного из поисковой строки
     } else {
-      return filterSearh(value);
+      return filterSearh(value,moviesList);
     }
   };
 
   useEffect(() => {
     if (isSavedMoviesPage && !searchStatus.isLoading) {
-      setFilteredMovies(filterMovies(savedSearch)); // сетим в стейт отфльтрованных фильмов
+      setFilteredMovies(filterMovies(savedSearch, movies)); // сетим в стейт отфльтрованных фильмов
     }
   }, [isSavedMoviesPage, savedSearch]);
 
@@ -73,36 +76,38 @@ const useSearch = ({ movies, isSavedMoviesPage }) => {
   }, [filteredMovies]);
 
   useEffect(() => {
-    if (KEYWORD_SEARCH in localStorage && !isSavedMoviesPage) {
-      const savedSearch = JSON.parse(localStorage.getItem(KEYWORD_SEARCH)); //достаем из стораджа сохр фильмы
+    if (KEYWORD_MOVIES in localStorage && !isSavedMoviesPage) {
+      const savedMovies = JSON.parse(localStorage.getItem(KEYWORD_SEARCHED_MOVIES));
+      const savedSearch = JSON.parse(localStorage.getItem(KEYWORD_VALUES));
       setSavedSearch({
         search: savedSearch.search,
         short: savedSearch.short,
-        savedMovies: savedSearch.savedMovies,
-      }); // сетим все значения в  этот стейт
-      setFilteredMovies(savedSearch.savedMovies);
+        savedMovies: savedMovies,
+      });
+      setFilteredMovies(savedMovies);
     }
-
-    if (!localStorage.getItem(KEYWORD_SEARCH) && !isSavedMoviesPage) {
-      setSearchStatus((data) => {
-        return {
-          ...data,
+    if (!(KEYWORD_MOVIES in localStorage) && !isSavedMoviesPage) {
+      setSearchStatus(
+        {
+          ...searchStatus,
           isFirstSearch: true,
           statusMessage: beforeSearching,
-        };
-      });
+        }
+      );
     }
   }, [beforeSearching, isSavedMoviesPage]);
 
   useEffect(() => {
-    if (isSavedMoviesPage) setFilteredMovies(filterMovies(savedSearch));
+    if (isSavedMoviesPage) {
+      setFilteredMovies(filterMovies(savedSearch, movies));
+    };
   }, [isSavedMoviesPage, movies]);
 
   useEffect(() => {
-    if (!isSavedMoviesPage && localStorage.getItem(KEYWORD_SEARCH)) {
+    if (!isSavedMoviesPage && localStorage.getItem(KEYWORD_MOVIES)) {
       setFilteredMovies(savedSearch.savedMovies);
     }
-  }, [isSavedMoviesPage, savedSearch]); // если мы на странице с фильмами, то добавляем фильм на страницу Сохранненых
+  }, [isSavedMoviesPage, savedSearch]);
 
   const setLoader = (boolean) => {
     setSearchStatus((data) => {
@@ -114,64 +119,57 @@ const useSearch = ({ movies, isSavedMoviesPage }) => {
     });
   };
 
-  useEffect(() => {
-    resetStatus();
-  }, [pathname]); //изменяем статус в зависимости от текущего роута
-
   const resetStatus = () => {
     setSearchStatus({
       ...searchStatus,
       statusMessage: '',
       isLoading: false,
     });
-  }; // сброс статуса
+  };
 
-  const handleSubmitSearch = (value) => {
-    if (isSavedMoviesPage) {
-      setSavedSearch({
-        search: value.search,
-        short: value.short,
-      }); // на сабмите берем значения и сетим в стейт с сохр поиском
+  const handleSubmitSearch = async (value) => {
+    let allMovies;
+    let data;
+    if (searchStatus.isFirstSearch && !isSavedMoviesPage) {
+      allMovies = await getMovies();
+      data = filterMovies(value, allMovies);
+    } else {
+      data = filterMovies(value, movies);
     }
 
     resetStatus();
     setLoader(true);
-    const data = filterMovies(value);
-    setTimeout(
-      () => {
-        if (data.length === 0) {
-          setSearchStatus((data) => {
-            return {
-              ...data,
-              statusMessage: noMovies,
-            };
-          });
-        }
-        setFilteredMovies(data);
-        setLoader(false);
-      },
-      searchStatus.isFirstSearch ? TIME_DOWNLOAD : TIME_OUT_PRELOADER
-    );
 
-    if (!isSavedMoviesPage) {
-      localStorage.setItem(
-        KEYWORD_SEARCH,
-        JSON.stringify({
-          savedMovies: data,
-          short: value.short,
-          search: value.search,
-        })
-      );
+    setTimeout(() => {
+      if (data.length === 0) {
+        setSearchStatus((data) => {
+          return {
+            ...data,
+            statusMessage: noMovies,
+          };
+        });
+      }
+      setFilteredMovies(data);
+      setLoader(false);
+    }, searchStatus.isFirstSearch ? TIME_DOWNLOAD : TIME_OUT_PRELOADER);
+
+    if (!isSavedMoviesPage && searchStatus.isFirstSearch) {
+      localStorage.setItem(KEYWORD_MOVIES, JSON.stringify(allMovies));
+      localStorage.setItem(KEYWORD_SEARCHED_MOVIES, JSON.stringify(data));
+      localStorage.setItem(KEYWORD_VALUES, JSON.stringify({
+        short: value.short,
+        search: value.search,
+      }));
+    } else if (!isSavedMoviesPage) {
+      localStorage.setItem(KEYWORD_SEARCHED_MOVIES, JSON.stringify(data));
+      localStorage.setItem(KEYWORD_VALUES, JSON.stringify({
+        short: value.short,
+        search: value.search,
+      }));
     }
+
   };
-  return {
-    filteredMovies,
-    savedSearch,
-    searchStatus,
-    handleSubmitSearch,
-    setSearchStatus,
-    resetStatus,
-  };
-};
+  return { filteredMovies, savedSearch, searchStatus, handleSubmitSearch, setSearchStatus, resetStatus }
+}
 
 export default useSearch;

@@ -1,100 +1,184 @@
-import MoviesCardList from './MoviesCardList/MoviesCardList';
-import FormSearch from '../Main/Form/FormSearch';
-import { useEffect, useState } from 'react';
-import Main from '../Main/Main';
-import useSearch from '../../hooks/useSearch';
+import React, { useCallback } from 'react';
+import SearchForm from '../SearchForm/SearchForm';
 import Preloader from '../Preloader/Preloader';
-import { deviceSettings } from '../../utils/data-list';
-import { KEYWORD_VALUES } from '../../utils/constants';
+import MoviesCardList from '../MoviesCardList/MoviesCardList';
+import { moviesApi } from '../../utils/MoviesApi';
+import AddMoviesButton from '../AddMoviesButton/AddMoviesButton';
+import { useScreen } from '../../hooks/useScreen';
 
-const Movies = ({
-  movies,
-  onMovieLike,
-  savedMovies,
-  device,
-  setMessage,
-  getMovies,
-}) => {
-  const { filteredMovies, savedSearch, searchStatus, handleSubmitSearch } =
-    useSearch({
-      movies: movies,
-      isSavedMoviesPage: false,
-      getMovies: getMovies,
-    });
-  //console.log('in Movie.js', movies, savedMovies); // movies 100 штук
+import './Movies.css';
 
-  const [valueSearch, setValueSearch] = useState({
-    search: savedSearch.search ?? '',
-    short: savedMovies.short ?? false,
-  });
+function Movies({ isError, onSave, loggedIn, setIsError, savedCards }) {
+  const [searchQuery, setSearchQuery] = React.useState('');
+  const [filteredCards, setFilteredCards] = React.useState([]);
+  const [cards, setCards] = React.useState([]);
+  const [isShortMovie, setIsShortMovie] = React.useState(false);
+  const [isLoading, setIsLoading] = React.useState(false);
+  const [isInputError, setIsInputError] = React.useState(false);
+  const [visibleCardsCount, setVisibleCardsCount] = React.useState(0);
+  const [isSending, setIsSending] = React.useState(false);
 
-  console.log('1004', valueSearch);
+  const { isDesktop, isTablet, isMobile, desktopAdd, tabletOrMobileAdd } =
+    useScreen();
 
-  const [moreMovies, setMoreMovies] = useState(0);
-  const [isShowMoreButton, setShowMoreButton] = useState(false);
-  const [maxShowMovies, setMaxShowMovies] = useState(0);
+  //отображение карточек
 
-  const handleClickMore = () => {
-    setMaxShowMovies((maxMovies) => maxMovies + moreMovies);
+  const handleShowCards = () => {
+    if (isDesktop) {
+      setVisibleCardsCount(12);
+    } else if (isTablet) {
+      setVisibleCardsCount(8);
+    } else if (isMobile) {
+      setVisibleCardsCount(5);
+    }
   };
 
-  useEffect(() => {
-    if (KEYWORD_VALUES in localStorage) {
-      const { search, short } = JSON.parse(
-        localStorage.getItem(KEYWORD_VALUES)
+  React.useEffect(() => {
+    handleShowCards();
+  }, [isDesktop, isTablet, isMobile]);
+
+  let timer = setTimeout(handleShowCards, 30000);
+
+  const handleResize = () => {
+    clearTimeout(timer);
+    timer = setTimeout(handleShowCards, 30000);
+  };
+
+  React.useEffect(() => {
+    window.addEventListener('resize', handleResize);
+    return () => {
+      window.removeEventListener('resize', handleResize);
+    };
+  }, []);
+
+  //добавление карточек по кнопке
+  function handleRowAdd() {
+    if (isDesktop) {
+      setVisibleCardsCount(
+        (visibleCardsCount) => visibleCardsCount + desktopAdd
       );
-      setValueSearch({
-        search: search,
-        short: short,
+    }
+    if (isMobile || isTablet) {
+      setVisibleCardsCount(
+        (visibleCardsCount) => visibleCardsCount + tabletOrMobileAdd
+      );
+    }
+  }
+
+  //ввод в строку поиска
+  function handleSearchChange(e) {
+    setSearchQuery(e.target.value);
+  }
+
+  //фильтрация карточек
+  const filterMovies = useCallback(() => {
+    const query = searchQuery.toLowerCase();
+    let filteredMovies = cards.filter((movie) => {
+      const movieTitleRU = movie.nameRU.toLowerCase();
+      const movieTitleEN = movie.nameEN.toLowerCase();
+      return movieTitleRU.includes(query) || movieTitleEN.includes(query);
+    });
+
+    if (isShortMovie) {
+      filteredMovies = filteredMovies.filter((movie) => movie.duration <= 40);
+    }
+
+    setFilteredCards(filteredMovies);
+  }, [searchQuery, cards, isShortMovie]);
+
+  //поиск по фильмам
+  const handleMoviesSearch = () => {
+    setIsSending(true);
+    setIsLoading(true);
+    moviesApi
+      .getMovies()
+      .then((cards) => {
+        setCards(cards);
+        filterMovies(searchQuery, isShortMovie, cards);
+        localStorage.setItem('search', JSON.stringify(searchQuery));
+        localStorage.setItem('isShort', JSON.stringify(isShortMovie));
+        localStorage.setItem('movies', JSON.stringify(cards));
+        setIsSending(false);
+      })
+      .catch((error) => {
+        setIsError(true);
+        console.log(error);
+        setIsSending(false);
+      })
+      .finally(() => {
+        setIsLoading(false);
       });
+  };
+
+  React.useEffect(() => {
+    filterMovies();
+  }, [filterMovies]);
+
+  React.useEffect(() => {
+    if (localStorage.search && localStorage.isShort && localStorage.movies) {
+      const search = JSON.parse(localStorage.search);
+      //setSearchQuery(search);
+      const isShort = JSON.parse(localStorage.isShort);
+      setIsShortMovie(isShort);
+      const movies = JSON.parse(localStorage.movies);
+      setCards(movies);
     }
   }, []);
 
-  useEffect(() => {
-    setMaxShowMovies(deviceSettings[device].maxMovies);
-    setMoreMovies(deviceSettings[device].moreMovies);
-  }, [device, movies]);
-
-  useEffect(() => {
-    if (!!filteredMovies) {
-      if (!(filteredMovies.length <= maxShowMovies)) {
-        setShowMoreButton(true);
-      } else {
-        setShowMoreButton(false);
-      }
+  //переключение
+  function handleShortMoviesChange() {
+    setIsShortMovie(!isShortMovie);
+    localStorage.setItem('isShort', JSON.stringify(!isShortMovie));
+    filterMovies();
+  }
+  
+  //функция сабмита
+  function handleSubmit(e) {
+    e.preventDefault();
+    if (searchQuery === '') {
+      setIsInputError(true);
+    } else {
+      handleMoviesSearch(filteredCards);
+      setIsInputError(false);
     }
-  }, [filteredMovies, maxShowMovies]);
+  }
+
 
   return (
-    <Main className='main__movies'>
-      <FormSearch
-        onSubmitSearch={handleSubmitSearch}
-        isSavedMoviesPage={false}
-        valueSearch={valueSearch}
-        setValueSearch={setValueSearch}
-        searchStatus={searchStatus}
-        savedSearch={savedSearch}
-        setMaxShowMovies={setMaxShowMovies}
-        device={device}
-        setMessage={setMessage}
-        isFormActivated={!searchStatus.isLoading}
+    <section className='movies section section_size_narrow section_screen_narrow'>
+      <SearchForm
+        onSubmit={handleSubmit}
+        onChange={handleSearchChange}
+        value={searchQuery}
+        checked={isShortMovie}
+        onCheckboxChange={handleShortMoviesChange}
+        isError={isInputError}
+        isSending={isSending}
       />
-      {searchStatus.isLoading ? (
+      {isLoading ? (
         <Preloader />
+      ) : isError ? (
+        <p className='movies__error'>
+          Во время запроса произошла ошибка. Возможно, проблема с соединением
+          или сервер недоступен. Подождите немного и попробуйте ещё раз
+        </p>
+      ) : filteredCards.length > 0 ? (
+        <>
+          <MoviesCardList
+            cards={filteredCards}
+            visibleCardsCount={visibleCardsCount}
+            savedCards={savedCards}
+            onSave={onSave}
+          />
+          {visibleCardsCount < filteredCards.length && (
+            <AddMoviesButton onClick={handleRowAdd} />
+          )}
+        </>
       ) : (
-        <MoviesCardList
-          isSavedMoviesPage={false}
-          moviesList={filteredMovies.slice(0, maxShowMovies)}
-          searchStatus={searchStatus}
-          onMovieLike={onMovieLike}
-          savedMovies={savedMovies}
-          isShowMoreButton={isShowMoreButton}
-          onSubmitMoreButton={handleClickMore}
-          showMoreButton={isShowMoreButton}
-        />
+        <p className='movies__error'>Ничего не найдено</p>
       )}
-    </Main>
+    </section>
   );
-};
+}
 
 export default Movies;

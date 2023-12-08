@@ -1,101 +1,117 @@
-import { apiConfig } from './utils';
-
-class Api {
-  constructor({ baseUrl, headers }) {
-    this._baseUrl = baseUrl.mainApi;
-    this._headers = headers;
+class MainApi {
+  constructor(options) {
+    this._url = options.baseUrl;
   }
 
-  // Метод создания нового пользователя
-  register = ({name, email, password}) => {
-    return fetch(`${this._baseUrl}/signup`, {
-      method: "POST",
+  _getResponseData(res) {
+    if (!res.ok) {
+      return Promise.reject(res.status);
+    }
+    return res.json();
+  }
+
+  getSavedMovies(token) {
+    return fetch(`${this._url}/movies`, {
       headers: {
-        "Content-Type": "application/json",
+        'Authorization': `Bearer ${token}`,
       },
-      credentials: 'include',
-      body: JSON.stringify({ name, email, password }),
-    }).then(handleResponse);
+    }).then(this._getResponseData);
+  }
+
+  register = (name, password, email) => {
+    return fetch(`${this._url}/signup`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        password: password,
+        email: email,
+        name: name,
+      }),
+    }).then(this._getResponseData);
   };
 
-  // Метод авторизации
-  login({ email, password }) {
-    return fetch(`${this._baseUrl}/signin`, {
+  authorize = (password, email) => {
+    return fetch(`${this._url}/signin`, {
       method: 'POST',
-      headers: this._headers,
-      credentials: 'include',
-      body: JSON.stringify({
-        email,
-        password,
-      }),
-    }).then(handleResponse);
-  }
-
-  // Метод запроса данных пользователя с сервера
-  checkToken (token) {
-    return fetch(`${this._baseUrl}/users/me`, {
-      method: "GET",
       headers: {
-        "Content-Type": "application/json",
-        authorization: `Bearer ${token}`,
+        'Content-Type': 'application/json',
       },
-      credentials: 'include',
-    }).then(handleResponse);
-  }
-
-  // метод запроса сохраненных фильмов с сервера
-  getUserMovies() {
-    return fetch(`${this._baseUrl}/movies`, {
-      method: 'GET',
-      credentials: 'include',
-    }).then(handleResponse);
-  }
-
-  getUser() {
-      return fetch(`${this._baseUrl}/users/me`, {
-        method:'GET',
-        credentials: 'include',
-      }).then(handleResponse);
-  }
-
-  // Метот передачи данных пользователя на сервер
-  setUserInfoApi({ name, email }) {
-    return fetch(`${this._baseUrl}/users/me`, {
-      method: 'PATCH',
-      headers: this._headers,
-      credentials: 'include',
       body: JSON.stringify({
-        name: name,
+        password: password,
         email: email,
       }),
-    }).then(handleResponse);
-  }
- // добавление в сохр. фильмы
-  addSavedMovies(movie) {
-    return fetch(`${this._baseUrl}/movies`, {
-      method: 'POST',
-      headers: this._headers,
-      credentials: 'include',
-      body: JSON.stringify(movie),
-    }).then(handleResponse);
+    }).then(this._getResponseData);
+  };
+
+  getContent = (token) => {
+    return fetch(`${this._url}/users/me`, {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${token}`,
+      },
+    }).then((res) => res.json());
+  };
+
+  getUserInfo(token) {
+    return fetch(`${this._url}/users/me`, {
+      headers: {
+        'Authorization': `Bearer ${token}`,
+      },
+    }).then(this._getResponseData);
   }
 
-  // Метод удаления карточки с сервера
-  deleteMovies(movieId) {
-    return fetch(`${this._baseUrl}$/movies/${movieId}`, {
+  editProfile(data, token) {
+    return fetch(`${this._url}/users/me`, {
+      method: 'PATCH',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${token}`,
+      },
+      body: JSON.stringify({
+        name: data.name,
+        email: data.email,
+      }),
+    }).then(this._getResponseData);
+  }
+
+  saveCard(data, token) {
+    return fetch(`${this._url}/movies`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${token}`,
+      },
+      body: JSON.stringify({
+        country: data.country,
+        director: data.director,
+        duration: data.duration,
+        description: data.description,
+        year: data.year,
+        image: `https://api.nomoreparties.co${data.image.url}`,
+        trailerLink: data.trailerLink,
+        thumbnail: `https://api.nomoreparties.co${data.image.formats.thumbnail.url}`,
+        nameRU: data.nameRU,
+        nameEN: data.nameEN,
+        movieId: data.id,
+      }),
+    }).then(this._getResponseData);
+  }
+
+  deleteCard(cardId, token) {
+    return fetch(`${this._url}/movies/${cardId}`, {
       method: 'DELETE',
-      headers: this._headers,
-      credentials: 'include',
-    }).then(handleResponse);
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    }).then(this._getResponseData);
   }
 }
 
-const handleResponse = (res) => {
-  if (res.ok) {
-    return res.json();
-  } else {
-    return Promise.reject(`Ошибка ${res.status}`);
-  }
-};
+const mainApi = new MainApi({
+  baseUrl: 'https://api.movies.balineseleaf.nomoredomainsrocks.ru',
+});
 
-export const api = new Api(apiConfig);
+export { mainApi };

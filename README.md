@@ -1,5 +1,7 @@
-# movies-explorer-frontend2
+<h1 align="center">MoviesExplorer</h1>
 
-Фронтэнд часть проекта Movies Explorer.
+<h2 align="center">
+  <a href="https://movies.balineseleaf.nomoredomainsrocks.ru/" style="color: black;" target="_blank">Ссылка</a>
+</h2>
 
-Макет dark-3.
+<h2>Описание проекта:</h2>

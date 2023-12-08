@@ -1,138 +1,142 @@
-import { useContext, useEffect } from 'react';
-import { profileForm } from '../../utils/data-list';
+import InfoTooltip from '../InfoTooltip/InfoTooltip';
+import { CurrentUserContext } from '../../context/CurrentUserContexts';
+import React from 'react';
+import { useFormWithValidation } from '../../hooks/useForm';
+import { emailRegex } from '../../utils/constants';
 import './Profile.css';
-import Form from '../Main/Form/Form';
-import Input from '../Main/Form/Input/Input';
-import { CurrentUserContext } from '../../contexts/CurrentUserContext';
-import { useValidate } from '../../hooks/useValidate';
 
-const Profile = ({  
-  onSubmit,
-  onSignout,
-  requestError,
-  isFormActivated,
-  setFormActivated,
-  isSendRequest,
-  setMessage,
-  }) => {
-  const currentUser = useContext(CurrentUserContext);
-  const { name, buttonTextDefault, inputs } = profileForm;
-  const {
-    values,
-    errors,
-    isValid,
-    setValues,
-    isFormValid,
-    handleChange,
-    setValid,
-  } = useValidate(inputs);
+function Profile({
+  onEditProfile,
+  onSignOut,
+  errorType,
+  isError,
+  isSuccess,
+  isEditing,
+  onEditClick,
+  loggedIn,
+  setIsError,
+  isSending,
+}) {
+  const currentUser = React.useContext(CurrentUserContext);
 
-  const handleChangeProfile = (evt) => {
-    handleChange(evt);
+  const { handleChange, formValue, errorMessage, isValid, resetForm } =
+    useFormWithValidation();
+
+  const isDataChanged =
+    formValue.name !== currentUser.name ||
+    formValue.email !== currentUser.email;
+
+  const handleInputChange = (e) => {
+    handleChange(e);
+    setIsError(false);
   };
 
-  const handleActivated = () => {
-    setFormActivated(true);
-    setMessage({
-      isMessageShow: false,
-      isError: false,
-      text: '',
-    });
-  };
-
-  const handleSubmit = (evt) => {
-    evt.preventDefault();
-    setFormActivated(false);
-    onSubmit(values);
-  };
-
-  const handleClickExit = () => {
-    onSignout();
-  };
-
-  useEffect(() => {
-    setValues((values) => ({
-      ...values,
+  React.useEffect(() => {
+    resetForm({
       name: currentUser.name,
       email: currentUser.email,
-    }));
-    if (currentUser) {
-      setValid((isValid) => ({ ...isValid, name: true, email: true }));
-    }
-  }, [currentUser]);
-
-  useEffect(() => {
-    setFormActivated(false);
-    setMessage({
-      isMessageShow: false,
-      isError: false,
-      text: '',
     });
-  }, [setFormActivated, setMessage]);
+    setIsError(false);
+  }, [resetForm, currentUser, isEditing, setIsError]);
+
+  function handleSubmit(e) {
+    e.preventDefault();
+    onEditProfile({
+      name: formValue.name,
+      email: formValue.email,
+    });
+  }
 
   return (
-    <main className='main'>
-      <section className='profile'>
-        <h1 className='profile__title'>{`Привет, ${currentUser.name}!`}</h1>
-        <Form 
-          name={name} 
-          buttonText={buttonTextDefault} 
-          onSubmit={handleSubmit}          
-          isFormActivated={isFormActivated}
-          disabledDafault={
-              currentUser.name === values.name &&
-              currentUser.email === values.email
-            }
-          requestError={requestError}
-          isSendRequest={isSendRequest}
-          isValid={isValid}
-          isFormValid={isFormValid}
-        >
-          <ul className={`form__list form__list_type_${name}`}>
-            {inputs.map((input) => (
-              <li
-                className={`form__item form__item_type_${name}`}
-                key={input.name + name}
-              >
-                <Input
-                  value={values[`${input.name}`]}
-                  input={input}
-                  handleChange={handleChangeProfile}
-                  form={name}
-                  isValid={isValid}
-                  disabled={!isFormActivated}
-                  onFocus={(e) => e.currentTarget.select()}
-                  errors={errors}
-                />
-              </li>
-            ))}
-          </ul>
-        </Form>
-        {!isFormActivated && !isSendRequest && (
-          <ul className='profile__list'>
-            <li className='profile__item'>
-              <button
-                type='button'
-                className='profile__button profile__button_edit'
-                onClick={handleActivated}
-              >
-                Редактировать
-              </button>
-            </li>
-            <li className='profile__item'>
-              <button
-                type='button'
-                className='profile__button profile__button_exit'
-                onClick={handleClickExit}
-              >
-                Выйти из аккаунта
-              </button>
-            </li>
-          </ul>
+    <main className='profile section'>
+      <h1 className='profile__title'>{`Привет, ${currentUser.name}!`}</h1>
+      <form
+        className='profile__info'
+        name='profile'
+        onSubmit={handleSubmit}
+        disabled={isSending}
+      >
+        <div className='profile__info-line'>
+          <div className='profile__input-group'>
+            <p className='profile__input-title'>Имя</p>
+
+            {isEditing ? (
+              <input
+                className='profile__input profile__input_purpose_name'
+                type='text'
+                name='name'
+                id='name'
+                value={formValue.name || ''}
+                onChange={handleInputChange}
+                placeholder='Введите имя'
+                minLength='2'
+                maxLength='20'
+                required
+              />
+            ) : (
+              <p className='profile__caption profile__caption_purpose_name'>
+                {currentUser.name}
+              </p>
+            )}
+          </div>
+          <span className='profile__input-error'>
+            {errorMessage.name || ''}
+          </span>
+        </div>
+        <div className='profile__info-line'>
+          <div className='profile__input-group'>
+            <p className='profile__input-title'>E-mail</p>
+            {isEditing ? (
+              <input
+                className='profile__input profile__input_purpose_email'
+                type='email'
+                name='email'
+                id='email'
+                value={formValue.email || ''}
+                onChange={handleInputChange}
+                pattern={emailRegex}
+                placeholder='Введите email'
+                required
+              />
+            ) : (
+              <p className='profile__caption profile__caption_purpose_email'>
+                {currentUser.email}
+              </p>
+            )}
+          </div>
+          <span className='profile__input-error'>
+            {errorMessage.email || ''}
+          </span>
+        </div>
+        {isEditing ? (
+          <>
+            {isError && <InfoTooltip errorType={isError ? errorType : ''} />}
+
+            <button
+              className='profile__save-button'
+              disabled={!isValid || isError || !isDataChanged || isSending}
+            >
+              Сохранить
+            </button>
+          </>
+        ) : (
+          <>
+            {!isError && isSuccess && (
+              <p id='profile__success-tooltip' className='profile__success-tooltip'>
+                Профиль успешно обновлен!
+              </p>
+            )}
+            <button onClick={onEditClick} className='profile__edit-button'>
+              Редактировать
+            </button>
+            <button onClick={onSignOut} className='profile__sign-out-button'>
+              Выйти из аккаунта
+            </button>
+          </>
         )}
-      </section>
+      </form>
     </main>
   );
-};
+}
 
 export default Profile;

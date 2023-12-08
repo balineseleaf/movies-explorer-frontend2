@@ -1,13 +1,10 @@
-import { Navigate, useLocation } from 'react-router-dom';
-import { PATHS } from '../../utils/constants';
+import React from 'react';
+import { Navigate } from "react-router-dom";
 
-const ProtectedRouteElement = ({ element: Component, ...props }) => {
-  const { pathname } = useLocation();
-  return props.isLoggedIn ? (
-    <Component {...props} />
-  ) : (
-    <Navigate to={PATHS.mainPath} state={{ backUrl: pathname }} replace />
-  );
-};
+const ProtectedRoute = ({ loggedIn, element: Component, ...props  }) => {
+  return (
+    loggedIn ? <Component {...props} /> : <Navigate to="/" replace />
+  )
+}
 
-export default ProtectedRouteElement;
+export default ProtectedRoute;

@@ -1,422 +1,283 @@
-import { Route, Navigate, Routes, useLocation } from 'react-router-dom';
-import './App.css';
-import { useState, useEffect, useRef } from 'react';
-import Header from '../Header/Header';
-import Landing from '../Main/Landing/Landing';
+import React, { useEffect } from "react";
+import Main from "../Main/Main";
 import Footer from '../Footer/Footer';
-import { CurrentUserContext } from '../../contexts/CurrentUserContext';
-import { MessageContext } from '../../contexts/MessageContext';
-import {
-  MESSAGE,
-  PATHS,
-  TIME_OUT_PRELOADER,
-  DEVICE_SETTING,
-  KEYWORD_ISLOGGEDIN,
-  TIME_REGISTER,
-} from '../../utils/constants';
-import SavedMovies from '../Movies/SavedMovies/SavedMovies';
-import Movies from '../Movies/Movies';
-import Profile from '../Profile/Profile';
-import Auth from '../Main/Auth/Auth';
-import Error from '../Main/Error/Error';
-import { useNavigate } from 'react-router-dom';
-import { api } from '../../utils/MainApi';
-import { apiMovies } from '../../utils/MoviesApi';
-import { selectErrorMessage } from '../../utils/utils';
-import Preloader from '../Preloader/Preloader';
-import ProtectedRouteElement from '../ProtectedRoute/ProtectedRoute';
+import NotFoundPage from "../NotFoundPage/NotFoundPage";
+import Menu from "../Menu/Menu";
+import {Routes, Route} from 'react-router-dom';
+import Header from '../Header/Header';
+import Register from "../Register/Register";
+import Login from "../Login/Login";
+import Profile from "../Profile/Profile";
+import Movies from "../Movies/Movies";
+import { CurrentUserContext } from "../../context/CurrentUserContexts";
+import { useLocation } from "react-router-dom";
+import { useMediaQuery } from "react-responsive";
+import { mainApi } from "../../utils/MainApi";
+import { useFormWithValidation } from '../../hooks/useForm';
+import { Navigate } from "react-router-dom";
+import {useNavigate} from 'react-router-dom';
+import ProtectedRoute from '../ProtectedRoute/ProtectedRoute';
+import './App.css';
+import SavedMovies from "../SavedMovies/SavedMovies";
 
-const App = () => {
-  const {
-    mainPath,
-    loginPath,
-    registerPath,
-    moviesPath,
-    savedMoviesPath,
-    profilePath,
-    otherPath,
-  } = PATHS;
 
-  const { pathname } = useLocation();
-  const [isErrorPage, setErrorPage] = useState(false);
-  const [currentUser, setCurrentUser] = useState({ isLoggedIn: true });
-  const [message, setMessage] = useState({
-    isMessageShow: false,
-    isError: false,
-    text: '',
-  });
+function App() {
+
+  const location = useLocation();
   const navigate = useNavigate();
-  const [isSendRequest, setSendRequest] = useState(false);
-  const [isLoadingContent, setLoadingContent] = useState(true);
-  const [savedMovies, setSavedMovies] = useState([]);
-  const [allMovies, setAllMovies] = useState([]);
-  const [requestError, setRequestError] = useState({});
-  const resizeCooldown = useRef(null);
-  const [device, setDevice] = useState(DEVICE_SETTING.desktop.device);
-  const [isFormActivated, setFormActivated] = useState(true);
 
-  // Получение сохраненных фильмов
-  const getSavedMovies = () => {
-    api
-      .getMovies()
-      .then((movies) => {
-        setSavedMovies(movies);
-      })
-      .catch((err) => {
-        setRequestError(err);
-        console.log(err);
-      });
-  };
+  const[savedCards, setSavedCards] = React.useState([]);
+  const[isLoading, setIsLoading] = React.useState(false);
+  const[isSuccess, setIsSuccess] = React.useState(false);
+  const[isEditing, setIsEditing] = React.useState(false);
+  const[isMenuOpen, setIsMenuOpen] = React.useState(false);
+  const[currentUser, setCurrentUser] = React.useState({});
+  const[isSending, setIsSending] = React.useState(false);
 
-  // Получение фильмов
-  const getMovies = () => {
-    apiMovies
-      .getMovies()
-      .then((movies) => {
-        setAllMovies(movies);
-      })
-      .catch((err) => {
-        setMessage({
-          isMessageShow: true,
-          isError: true,
-          text: MESSAGE.serverError,
-        });
-        console.log(err);
-      });
-  };
-  //Получение токена для авторизации
-  const checkToken = () => {
-    api
-      .checkToken()
-      .then((user) => {
-        setCurrentUser({
-          name: user.name,
-          email: user.email,
-          isLoggedIn: true,
-        });
-      })
-      .catch((err) => {
-        setCurrentUser({ isLoggedIn: false });
-        console.log(err);
-      });
-  };
-  // что делаем при логине
+  const isMobileScreen = useMediaQuery({ maxWidth: 768 });
+
+  const[errorType, setErrorType] = React.useState('');
+
+  const[isError, setIsError] = React.useState(false);
+
+  const[isRegisterError, setIsRegisterError] = React.useState(false);
+  const[isLoginError, setIsLoginError] = React.useState(false);
+
+  const initialLoggedIn = !!localStorage.getItem('token');
+  const [loggedIn, setLoggedIn] = React.useState(initialLoggedIn);
+
   useEffect(() => {
-    if (currentUser.isLoggedIn) {
-      checkToken();
-      getSavedMovies();
-    }
-    setTimeout(() => {
-      setLoadingContent(false);
-    }, TIME_OUT_PRELOADER);
-  }, [currentUser.isLoggedIn]);
+    handleTokenCheck();
+  }, []);
 
-  // Рисуем фильмы при авторизации
-  useEffect(() => {
-    if (currentUser.isLoggedIn) {
-      getMovies();
-      setTimeout(() => {
-        setLoadingContent(false);
-      }, TIME_OUT_PRELOADER);
-    }
-  }, [currentUser.isLoggedIn]);
-
-  // TODO: подумать можно ли объединять два эффекта
-
-  // Изменение кол-ва карточек с кнопкой "Еще"
-  useEffect(() => {
-    const handleChangeDevice = () => {
-      clearTimeout(resizeCooldown.current);
-      resizeCooldown.current = setTimeout(() => {
-        if (window.innerWidth < DEVICE_SETTING.mobile.maxSize) {
-          setDevice(DEVICE_SETTING.mobile.device);
-        } else if (window.innerWidth < DEVICE_SETTING.tablet.maxSize) {
-          setDevice(DEVICE_SETTING.tablet.device);
-        } else {
-          setDevice(DEVICE_SETTING.desktop.device);
-        }
-      }, TIME_OUT_PRELOADER);
-    };
-    // вызываем функцию и вешаем слушатель события
-    handleChangeDevice();
-    window.addEventListener('resize', handleChangeDevice);
-    // снимаем слушатель
-    return () => {
-      clearTimeout(resizeCooldown.current);
-      window.removeEventListener('resize', handleChangeDevice);
-    };
-  }, [device]); // в зависимости от аппарата
-
-  // Функция логина
-  const handleLogin = (value) => {
-    setMessage({ isMessageShow: false, isError: false, text: '' });
-    setSendRequest(true);
-    api
-      .authorize(value)
-      .then(() => {
-        navigate(moviesPath, { replace: true }); // сразу на страницу с фильмами перенаправляем
-        setCurrentUser({ ...currentUser, isLoggedIn: true });
-        localStorage.setItem(KEYWORD_ISLOGGEDIN, true); // в локалсторадж записываем
+  const handleTokenCheck = () => {
+    const token = localStorage.getItem('token');
+    if (token){
+      mainApi.getContent(token)
+      .then((res) => {
+        setLoggedIn(true);
+        // navigate('/', {replace: true});
       })
-      .catch((err) => {
-        setFormActivated(true);
-        setTimeout(() => {
-          setMessage({
-            isMessageShow: true,
-            isError: true,
-            text: selectErrorMessage(err),
-          });
-        }, TIME_OUT_PRELOADER);
+      .catch(err => {
+        console.log(err);
       })
-      .finally(
-        setTimeout(() => {
-          setSendRequest(false);
-        }, TIME_OUT_PRELOADER)
-      );
-  };
-  // функция регистрации
-  const handleRegister = (value) => {
-    setMessage({ isMessageShow: false, isError: false, text: '' });
-    setSendRequest(true);
-    api
-      .addNewUser(value)
-      .then(() => {
-        setMessage({
-          isMessageShow: true,
-          isError: false,
-          text: MESSAGE.registred,
-        });
-        setTimeout(() => {
-          handleLogin(value);
-          setMessage({
-            isMessageShow: false,
-            isError: false,
-            text: '',
-          });
-        }, TIME_REGISTER);
-      })
-      .catch((err) => {
-        setFormActivated(true);
-        setTimeout(() => {
-          setMessage({
-            isMessageShow: true,
-            isError: true,
-            text: selectErrorMessage(err),
-          });
-        }, TIME_OUT_PRELOADER);
-      })
-      .finally(
-        setTimeout(() => {
-          setSendRequest(false);
-        }, TIME_OUT_PRELOADER)
-      );
-  };
-  // лайки фильмов
-  const handleMovieLike = (movie) => {
-    const isLiked = savedMovies.some((item) => item.movieId === movie.movieId);
+    } 
+  }
 
-    if (!isLiked) {
-      api
-        .addSavedMovies(movie)
-        .then((newMovie) => {
-          setSavedMovies([...savedMovies, newMovie]);
+  React.useEffect(() => {
+    if(loggedIn) {
+      const token = localStorage.getItem('token');
+      Promise.all([mainApi.getUserInfo(token), mainApi.getSavedMovies(token)])
+        .then(([userInfo, movies]) => {
+          setCurrentUser(userInfo);
+          setSavedCards(movies);
         })
-        .catch((err) => console.log(err));
+        .catch((error) => console.log(`Ошибка ${error}`));
+      }
+  }, [loggedIn]);
+
+  function handleCardDelete(card) {
+    const token = localStorage.getItem('token');
+    mainApi.deleteCard(card._id, token)
+    .then(() => {
+      setSavedCards((state) => state.filter((c) => c._id !== card._id));
+    })
+    .catch((error => console.log(error)))
+  }
+
+  function handleSaveCard(data) {
+    const isSaved = savedCards.some(item => item.movieId === data.id)
+    const token = localStorage.getItem('token');
+    if(isSaved) {
+      const cardToDelete = savedCards.find((card) => card.movieId === data.id)
+      handleCardDelete(cardToDelete);
     } else {
-      const id = savedMovies.find((item) => item.movieId === movie.movieId)._id;
-      api
-        .deleteMovies(id)
-        .then(() => {
-          setSavedMovies((movies) => movies.filter((item) => item._id !== id));
-        })
-        .catch((err) => console.log(err));
-    }
-  };
-  // удаление фильмов
-  const handleMovieDelete = (movie) => {
-    api
-      .deleteMovies(movie._id)
-      .then(() => {
-        setSavedMovies((movies) =>
-          movies.filter((item) => item._id !== movie._id)
-        );
+      mainApi.saveCard(data, token)
+      .then((newCard) => {
+        setSavedCards([newCard, ...savedCards])
       })
-      .catch((err) => console.log(err));
-  };
-  // Управление профилем
-  const handleChengeProfile = (value) => {
-    setMessage({ isMessageShow: false, isError: false, text: '' });
-    setSendRequest(true);
-    api
-      .setUserInfoApi(value)
-      .then(({ name, email }) => {
-        setCurrentUser({ ...currentUser, name, email });
-        setFormActivated(false);
-        setTimeout(() => {
-          setMessage({
-            isMessageShow: true,
-            isError: false,
-            text: MESSAGE.profileUpdate,
-          });
-        }, TIME_OUT_PRELOADER);
-      })
-      .catch((err) => {
-        setFormActivated(true);
-        setTimeout(() => {
-          setMessage({
-            isMessageShow: true,
-            isError: true,
-            text: selectErrorMessage(err),
-          });
-        }, TIME_OUT_PRELOADER);
-      })
-      .finally(
-        setTimeout(() => {
-          setSendRequest(false);
-        }, TIME_OUT_PRELOADER)
-      );
-  };
-  // Выход из аккаунта пользователя
-  const handleSignout = () => {
-    api
-      .logout()
-      .then(() => {
-        navigate(mainPath, { replace: true });
-        localStorage.clear();
-        setCurrentUser({ name: '', email: '', isLoggedIn: false });
-        setSavedMovies([]);
-        setRequestError({});
-        setMessage({
-          isMessageShow: false,
-          isError: false,
-          text: '',
-        });
-        setFormActivated(true);
-        setAllMovies([]);
-      })
-      .catch((err) => console.log(err))
-      .finally(
-        setTimeout(() => {
-          setLoadingContent(false);
-        }, TIME_OUT_PRELOADER)
-      );
+      .catch((error) => console.log(error))
+    }  
+  }
+
+  const { formValue, handleChange, resetForm, errorMessage, isValid, isEmailValid } = useFormWithValidation();
+
+  function handleRegister() {
+    const {name, email, password} = formValue;
+    mainApi.register(name, password, email)
+    .then((res) => {
+      handleLogin();
+    })
+    .catch(error => {
+      setIsRegisterError(true);
+      console.log(error);
+      if (error === 409) {
+        setErrorType('conflict');
+      } else {
+        setErrorType('register')
+      }      
+    }); 
+  }
+
+  const handleLogin = () => {
+    setIsSending(true);
+    const {password, email} = formValue;
+    mainApi.authorize(password, email)
+    .then((res) => {
+      localStorage.setItem('token', res.token);
+      setLoggedIn(true);
+      navigate('/movies', {replace: true}); 
+      setIsSending(false);
+    })
+    .catch(err => {
+      setIsLoginError(true);
+      console.log(err);
+      if (err === 400) {
+        setErrorType('auth');
+      } else {
+        setErrorType('noToken')
+      } 
+      setIsSending(false);
+    }); 
+  }
+
+  const handleEditClick = () => {
+    setIsEditing(true);
+    setIsError(false);
   };
 
-  useEffect(() => {
-    setMessage((message) => ({ ...message, text: '' }));
-  }, [pathname]);
+  const handleEditProfile = (data) => {
+    setIsSending(true);
+    const token = localStorage.getItem('token');
+    mainApi.editProfile(data, token)
+    .then((user) => {
+      setCurrentUser(user);
+      setIsSuccess(true);
+      setIsEditing(false);
+      setIsSending(false);
+    })
+    .catch((error) => {
+      setIsSending(false);
+      setIsError(true);
+      console.log(error);
+      if (error === 409) {
+        setErrorType('conflict');
+      } else if (error === 500) {
+        setErrorType('server');
+      } else {
+        setErrorType('edit');
+      }
+    })
+  }
 
-  return isLoadingContent ? (
-    <Preloader />
-  ) : (
-    <MessageContext.Provider value={message}>
-      <CurrentUserContext.Provider value={currentUser}>
-        {!isErrorPage && <Header />}
-        <Routes>
-          <Route
-            path={mainPath}
-            element={<Landing isLoadingContent={isLoadingContent} />}
-          />
-          <Route
-            path={moviesPath}
-            element={
-              <ProtectedRouteElement
-                element={Movies}
-                isLoggedIn={currentUser.isLoggedIn}
-                movies={allMovies}
-                onMovieLike={handleMovieLike}
-                savedMovies={savedMovies}
-                device={device}
-                isFormActivated={isFormActivated}
+  const handleSignOut = () => {
+    localStorage.removeItem('token');
+    setLoggedIn(false);
+    localStorage.clear();
+    navigate('/', {replace: true});
+  }
+
+  const handleOpenMenuClick = () => {
+    setIsMenuOpen(true);
+  }
+
+  const handleCloseMenuClick = () => {
+    setIsMenuOpen(false);
+  }
+
+  return (
+    <CurrentUserContext.Provider value={currentUser}>
+      <div className="App">
+        <div className='page__container'>
+          {['/', '/movies', '/saved-movies', '/profile'].includes(location.pathname) ? <Header loggedIn={loggedIn} isMobileScreen={isMobileScreen} onOpenMenu={handleOpenMenuClick} ></Header> : null}
+          <Routes>
+            <Route path="/" 
+              element={<Main loggedIn={loggedIn} />}
+            />
+            <Route path="*" 
+              element={<NotFoundPage />}
+            />
+            <Route path="/signin"
+              element={loggedIn ? (
+              <Navigate to='/' replace />
+            ) : ( 
+              <Login
+                errorType={errorType}
+                onLogin={handleLogin}
+                onChange={handleChange} 
+                formValue={formValue} 
+                errorMessage={errorMessage} 
+                isValid={isValid} 
+                isError={isLoginError}
+                setIsError={setIsLoginError}
+                isSending={isSending}
               />
-            }
-            savedMovies={savedMovies}
-          />
-          <Route
-            path={savedMoviesPath}
-            element={
-              <ProtectedRouteElement
-                element={SavedMovies}
-                onMoviedDelete={handleMovieDelete}
-                savedMovies={savedMovies}
-                isLoggedIn={currentUser.isLoggedIn}
+            )}>
+            </Route>
+            <Route path="/signup" 
+              element={loggedIn ? (
+                <Navigate to='/' replace />
+              ) : ( 
+              <Register 
+                errorType={errorType} 
+                onRegister={handleRegister} 
+                onChange={handleChange} 
+                formValue={formValue} 
+                errorMessage={errorMessage} 
+                isValid={isValid} 
+                isError={isRegisterError}
+                setIsError={setIsRegisterError}
+                isEmailValid={isEmailValid}
+                isSending={isSending}
               />
-            }
+            )}>
+            </Route>
+            <Route path="/profile" element={
+            <ProtectedRoute
+              element={Profile}
+              onEditProfile={handleEditProfile}
+              onSignOut={handleSignOut}
+              errorType={errorType}
+              isError={isError}
+              isSuccess={isSuccess}
+              isEditing={isEditing}
+              onEditClick={handleEditClick}
+              loggedIn={loggedIn}
+              setIsError={setIsError}
+              isSending={isSending}
+              />}
+            />
+            <Route path="/movies" element={
+            <ProtectedRoute
+              element={Movies}
+              isError={isError}
+              onSave={handleSaveCard}
+              loggedIn={loggedIn}
+              isLoading={isLoading}
+              setIsError={setIsError}
+              savedCards={savedCards}
+            />}
+            />
+            <Route path="/saved-movies" element={
+            <ProtectedRoute
+              element={SavedMovies}
+              savedCards={savedCards}
+              onDelete={handleCardDelete}
+              isError={isError}
+              loggedIn={loggedIn}
+              />}
+            />
+          </Routes>
+          {['/', '/movies', '/saved-movies'].includes(location.pathname) ? <Footer></Footer> : null}
+          <Menu
+            isOpen={isMenuOpen} 
+            onClose={handleCloseMenuClick} 
           />
-          <Route
-            path={profilePath}
-            element={
-              <ProtectedRouteElement
-                element={Profile}
-                onSubmit={handleChengeProfile}
-                isLoggedIn={currentUser.isLoggedIn}
-                onSignout={handleSignout}
-                isLoadingContent={isLoadingContent}
-                setRequestError={setRequestError}
-                requestError={requestError}
-                isFormActivated={isFormActivated}
-                setFormActivated={setFormActivated}
-                isSendRequest={isSendRequest}
-                setMessage={setMessage}
-              />
-            }
-          />
-          <Route
-            path={registerPath}
-            element={
-              currentUser.isLoggedIn ? (
-                <Navigate to={mainPath} replace />
-              ) : (
-                <Auth
-                  onRegister={handleRegister}
-                  requestError={requestError}
-                  setRequestError={setRequestError}
-                  isLoadingContent={isLoadingContent}
-                  message={message}
-                  setMessage={setMessage}
-                  setFormActivated={setFormActivated}
-                  isFormActivated={isFormActivated}
-                  isSendRequest={isSendRequest}
-                />
-              )
-            }
-          />
-          <Route
-            path={loginPath}
-            element={
-              currentUser.isLoggedIn ? (
-                <Navigate to={moviesPath} replace />
-              ) : (
-                <Auth
-                  onLogin={handleLogin}
-                  requestError={requestError}
-                  setRequestError={setRequestError}
-                  isLoadingContent={isLoadingContent}
-                  message={message}
-                  setMessage={setMessage}
-                  setFormActivated={setFormActivated}
-                  isFormActivated={isFormActivated}
-                  isSendRequest={isSendRequest}
-                />
-              )
-            }
-          />
-          <Route
-            path={otherPath}
-            element={<Error setIsErrorPage={setErrorPage} />}
-          />
-        </Routes>
-        {isErrorPage ||
-        pathname === loginPath ||
-        pathname === registerPath ||
-        pathname === profilePath ? (
-          ''
-        ) : (
-          <Footer />
-        )}
-      </CurrentUserContext.Provider>
-    </MessageContext.Provider>
+          
+        </div>
+      </div>
+    </CurrentUserContext.Provider>
   );
-};
+}
 
 export default App;

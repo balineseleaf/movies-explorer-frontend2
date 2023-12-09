@@ -1,43 +1,34 @@
-import './Footer.css';
 import React from 'react';
-import Navigation from '../Navigation/Navigation';
 import { Link } from 'react-router-dom';
+import './Footer.css';
 
-const Footer = () => {
+function Footer() {
   return (
-    <footer className='footer'>
-      <div className='footer__container'>
-        <p className='footer__description'>
-          Учебный проект Яндекс.Практикум x BeatFilm.
-        </p>
-        <div className='footer__wrapper'>
-          <Navigation className={'footer__navigation'}>
-            <ul className='footer__list'>
-              <li className='footer__item'>
-                <Link
-                  className='footer__link'
-                  to='https://practicum.yandex.ru/'
-                  target='_blank'
-                >
-                  Яндекс.Практикум
-                </Link>
-              </li>
-              <li className='footer__item'>
-                <Link
-                  className='footer__link'
-                  to='https://github.com/balineseleaf/movies-explorer-frontend'
-                  target='_blank'
-                >
-                  Github
-                </Link>
-              </li>
-            </ul>
-          </Navigation>
-          <p className='footer__copyright'>&copy; 2023</p>
-        </div>
+    <div className='footer section section_size_narrow section_screen_narrow'>
+      <p className='footer__heading'>
+        Учебный проект Яндекс.Практикум х BeatFilm.
+      </p>
+      <div className='footer__content'>
+        <p className='footer__copyright footer__content-item'>© 2023</p>
+        <nav className='footer__platforms'>
+          <Link
+            to='https://practicum.yandex.ru/'
+            className='footer__platforms-item footer__content-item'
+            target='_blank'
+          >
+            Яндекс.Практикум
+          </Link>
+          <Link
+            to='https://github.com/balineseleaf/movies-explorer-frontend2'
+            className='footer__platforms-item footer__content-item'
+            target='_blank'
+          >
+            Github
+          </Link>
+        </nav>
       </div>
-    </footer>
+    </div>
   );
-};
+}
 
 export default Footer;

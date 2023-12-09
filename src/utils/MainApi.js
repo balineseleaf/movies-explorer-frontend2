@@ -1,113 +1,117 @@
-import { METHODS_FETCH, PATHS } from './constants';
-import { apiConfig } from './utils';
-
-const { loginPath, logoutPath, registerPath, userPath, moviesPath } = PATHS;
-const { postFetch, patchFetch, deleteFetch } = METHODS_FETCH;
-
-class Api {
-  constructor({ baseUrl, headers }) {
-    this._baseUrl = baseUrl.mainApi;
-    this._headers = headers;
+class MainApi {
+  constructor(options) {
+    this._url = options.baseUrl;
   }
 
-  // Приватный метод проверки успешности запроса
-  _isOk(res) {
-    if (res.ok) {
-      return res.json();
+  _getResponseData(res) {
+    if (!res.ok) {
+      return Promise.reject(res.status);
     }
-    console.log(res);
-    return res.json().then((res) => {
-      throw res;
-    });
+    return res.json();
   }
 
-  // Приватный метод запроса сразу с проверкой ответа
-  _request(url, options) {
-    return fetch(url, options).then(this._isOk);
+  getSavedMovies(token) {
+    return fetch(`${this._url}/movies`, {
+      headers: {
+        'Authorization': `Bearer ${token}`,
+      },
+    }).then(this._getResponseData);
   }
 
-  // Метод создания нового пользователя
-  addNewUser({ name, password, email }) {
-    return this._request(`${this._baseUrl}${registerPath}`, {
-      method: postFetch,
-      headers: this._headers,
-      credentials: 'include',
+  register = (name, password, email) => {
+    return fetch(`${this._url}/signup`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
       body: JSON.stringify({
-        name: name,
-        email: email,
         password: password,
-      }),
-    });
-  }
-
-  // Метод авторизации
-  authorize({ password, email }) {
-    return this._request(`${this._baseUrl}${loginPath}`, {
-      method: postFetch,
-      headers: this._headers,
-      credentials: 'include',
-      body: JSON.stringify({
         email: email,
-        password: password,
-      }),
-    });
-  }
-
-  // Метод запроса данных пользователя с сервера
-  checkToken() {
-    return this._request(`${this._baseUrl}${userPath}`, {
-      headers: this._headers,
-      credentials: 'include',
-    });
-  }
-
-  // Метод выхода пользователя
-  logout() {
-    return this._request(`${this._baseUrl}${logoutPath}`, {
-      headers: this._headers,
-      credentials: 'include',
-    });
-  }
-
-  // метод запроса сохраненных фильмов с сервера
-  getMovies() {
-    return this._request(`${this._baseUrl}${moviesPath}`, {
-      headers: this._headers,
-      credentials: 'include',
-    });
-  }
-
-  // Метот передачи данных пользователя на сервер
-  setUserInfoApi({ name, email }) {
-    return this._request(`${this._baseUrl}${userPath}`, {
-      method: patchFetch,
-      headers: this._headers,
-      credentials: 'include',
-      body: JSON.stringify({
         name: name,
+      }),
+    }).then(this._getResponseData);
+  };
+
+  authorize = (password, email) => {
+    return fetch(`${this._url}/signin`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        password: password,
         email: email,
       }),
-    });
+    }).then(this._getResponseData);
+  };
+
+  getContent = (token) => {
+    return fetch(`${this._url}/users/me`, {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${token}`,
+      },
+    }).then((res) => res.json());
+  };
+
+  getUserInfo(token) {
+    return fetch(`${this._url}/users/me`, {
+      headers: {
+        'Authorization': `Bearer ${token}`,
+      },
+    }).then(this._getResponseData);
   }
 
-  // Метод отправки данных об установке/снятии лайка на сервер
-  addSavedMovies(movie) {
-    return this._request(`${this._baseUrl}${moviesPath}`, {
-      method: postFetch,
-      headers: this._headers,
-      credentials: 'include',
-      body: JSON.stringify(movie),
-    });
+  editProfile(data, token) {
+    return fetch(`${this._url}/users/me`, {
+      method: 'PATCH',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${token}`,
+      },
+      body: JSON.stringify({
+        name: data.name,
+        email: data.email,
+      }),
+    }).then(this._getResponseData);
   }
 
-  // Метод удаления карточки с сервера
-  deleteMovies(movieId) {
-    return this._request(`${this._baseUrl}${moviesPath}/${movieId}`, {
-      method: deleteFetch,
-      headers: this._headers,
-      credentials: 'include',
-    });
+  saveCard(data, token) {
+    return fetch(`${this._url}/movies`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${token}`,
+      },
+      body: JSON.stringify({
+        country: data.country,
+        director: data.director,
+        duration: data.duration,
+        description: data.description,
+        year: data.year,
+        image: `https://api.nomoreparties.co${data.image.url}`,
+        trailerLink: data.trailerLink,
+        thumbnail: `https://api.nomoreparties.co${data.image.formats.thumbnail.url}`,
+        nameRU: data.nameRU,
+        nameEN: data.nameEN,
+        movieId: data.id,
+      }),
+    }).then(this._getResponseData);
+  }
+
+  deleteCard(cardId, token) {
+    return fetch(`${this._url}/movies/${cardId}`, {
+      method: 'DELETE',
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    }).then(this._getResponseData);
   }
 }
 
-export const api = new Api(apiConfig);
+const mainApi = new MainApi({
+  baseUrl: 'https://api.movies.balineseleaf.nomoredomainsrocks.ru',
+});
+
+export { mainApi };

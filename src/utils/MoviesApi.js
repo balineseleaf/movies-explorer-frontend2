@@ -1,32 +1,24 @@
-import { apiConfig } from './utils';
-
-class ApiMovies {
-  constructor({ baseUrl, headers }) {
-    this._baseUrl = baseUrl.moviesApi;
-    this._headers = headers;
+class MoviesApi {
+  constructor(options) {
+    this._url = options.baseUrl;
   }
 
-  // Метод проверки успешности запроса
-  _isOk(res) {
-    if (res.ok) {
-      return res.json();
+  _getResponseData(res) {
+    if (!res.ok) {
+      return Promise.reject(`Ошибка: ${res.status}`);
     }
-    return Promise.reject(
-      `Что-то где-то пошло не так... Код ошибки ${res.status}`
-    );
+    return res.json();
   }
 
-  // Метод запроса с проверкой ответа
-  _request(url, options) {
-    return fetch(url, options).then(this._isOk);
-  }
-
-  // Метод запроса данных пользователя с сервера
   getMovies() {
-    return this._request(this._baseUrl, {
-      headers: this._headers,
-    });
+    return fetch(`${this._url}`, {
+      headers: {},
+    }).then(this._getResponseData);
   }
 }
 
-export const apiMovies = new ApiMovies(apiConfig);
+const moviesApi = new MoviesApi({
+  baseUrl: 'https://api.nomoreparties.co/beatfilm-movies',
+});
+
+export { moviesApi };

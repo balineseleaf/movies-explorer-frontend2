@@ -117,7 +117,7 @@ function Movies({ isError, onSave, loggedIn, setIsError, savedCards }) {
   React.useEffect(() => {
     if (localStorage.search && localStorage.isShort && localStorage.movies) {
       const search = JSON.parse(localStorage.search);
-      //setSearchQuery(search);
+      setSearchQuery(search);
       const isShort = JSON.parse(localStorage.isShort);
       setIsShortMovie(isShort);
       const movies = JSON.parse(localStorage.movies);
